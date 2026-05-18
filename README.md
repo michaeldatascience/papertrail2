@@ -1,867 +1,438 @@
-# Local Agentic Medical Document Extraction System
+# Papertrail2 / Local Document Extraction System
 
-![HIPAA Compliant](https://img.shields.io/badge/HIPAA-Compliant-green) ![Local AI](https://img.shields.io/badge/AI-100%25%20Local-blue) ![Version](https://img.shields.io/badge/Version-2.0.0-orange) ![Agents](https://img.shields.io/badge/Agents-4--Agent%20Architecture-purple) ![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)
+This is the **working-root documentation** for the repo as it exists in code after local repair and bring-up.
 
-A **production-ready, HIPAA-compliant document extraction system** using **local Vision Language Models (VLM)** with a **4-agent architecture** for complex documents(zero shot solution so it can work with wider range of projects). Built for **100% local processing** with no cloud dependencies.
+All pre-existing documentation files were moved under [`docs/`](./docs/). In particular:
+- original top-level README → [`docs/UPSTREAM_README.md`](./docs/UPSTREAM_README.md)
+- enterprise guide → [`docs/ENTERPRISE_GUIDE.md`](./docs/ENTERPRISE_GUIDE.md)
+- setup repair notes → [`docs/SETUP_REPAIR_NOTES.md`](./docs/SETUP_REPAIR_NOTES.md)
 
----
-
-## Key Features
-
-| Feature | Description |
-|---------|-------------|
-| **100% Local AI** | All processing done locally via LM Studio - no PHI leaves your system |
-| **4-Agent Architecture** | Orchestrator, Analyzer, Extractor, Validator for robust extraction |
-| **3-Layer Anti-Hallucination** | Prompt engineering, dual-pass extraction, pattern validation |
-| **VLM-Powered** | Qwen3-VL 8B for state-of-the-art vision understanding |
-| **HIPAA Compliant** | Built-in compliance with encrypted storage and audit logging |
-| **15-25 sec/page** | Fast processing with only 3-4 VLM calls per page |
+This file is intentionally different: it documents **our observed understanding of the codebase**, how to set it up, how to run it, what had to be fixed to make it boot, and how to debug it.
 
 ---
 
-## System Architecture
+## 1. What this repo is, based on the code
 
-### High-Level Overview
+Observed from `main.py`, `src/api`, `src/pipeline`, `src/agents`, `src/preprocessing`, `src/export`, and the Next.js frontend:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              INPUT LAYER                                     │
-│  ┌───────────────┐    ┌───────────────┐    ┌───────────────┐                │
-│  │   REST API    │    │   Batch Job   │    │   Streamlit   │                │
-│  │   (FastAPI)   │    │   (Celery)    │    │      UI       │                │
-│  └───────┬───────┘    └───────┬───────┘    └───────┬───────┘                │
-└──────────┼────────────────────┼────────────────────┼────────────────────────┘
-           │                    │                    │
-           └────────────────────┼────────────────────┘
-                                ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         PREPROCESSING LAYER                                  │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │                      PDF Processor (PyMuPDF)                          │  │
-│  │                                                                       │  │
-│  │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌──────────┐ │  │
-│  │   │ PDF Validate│──▶│ Page Extract│──▶│   Enhance   │──▶│  Output  │ │  │
-│  │   │ & Metadata  │   │   300 DPI   │   │   (OpenCV)  │   │  Images  │ │  │
-│  │   └─────────────┘   └─────────────┘   └─────────────┘   └──────────┘ │  │
-│  └───────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    AGENT LAYER (LangGraph State Machine)                     │
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │                         ORCHESTRATOR AGENT                              ││
-│  │              LangGraph StateGraph + Checkpointing                       ││
-│  │                         (0 VLM Calls)                                   ││
-│  └─────────────────────────────────┬───────────────────────────────────────┘│
-│                                    │                                         │
-│                                    ▼                                         │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │                          ANALYZER AGENT                                 ││
-│  │         Document Classification + Schema Selection                      ││
-│  │                        (1 VLM Call/Doc)                                 ││
-│  └─────────────────────────────────┬───────────────────────────────────────┘│
-│                                    │                                         │
-│                                    ▼                                         │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │                         EXTRACTOR AGENT                                 ││
-│  │           Dual-Pass Extraction + Confidence Scoring                     ││
-│  │                       (2 VLM Calls/Page)                                ││
-│  └─────────────────────────────────┬───────────────────────────────────────┘│
-│                                    │                                         │
-│                                    ▼                                         │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │                         VALIDATOR AGENT                                 ││
-│  │        Hallucination Detection + Cross-Field Validation                 ││
-│  │                      (0-1 VLM Calls/Doc)                                ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            VLM BACKEND                                       │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │                  LM Studio Server (localhost:1234)                    │  │
-│  │                                                                       │  │
-│  │   Model: Qwen3-VL 8B (Q4_K_M)    │    Context: 32K Tokens            │  │
-│  │   VRAM: ~6GB                      │    API: OpenAI Compatible         │  │
-│  └───────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            OUTPUT LAYER                                      │
-│  ┌───────────────┐    ┌───────────────┐    ┌───────────────┐                │
-│  │     JSON      │    │     Excel     │    │   Database    │                │
-│  │  (Pydantic)   │    │   (openpyxl)  │    │   (SQLite)    │                │
-│  └───────────────┘    └───────────────┘    └───────────────┘                │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+### Core purpose
+This repo is a **local-first AI document extraction system**.
+
+It combines:
+- a **Python backend**
+- a **FastAPI API**
+- a **CLI entry point**
+- a **Next.js frontend**
+- a **local VLM backend**, expected to be **LM Studio** on `http://127.0.0.1:1234` / `http://localhost:1234`
+
+### Main runtime surfaces
+From `main.py` and `src/api/routes/*`, there are three practical ways to use it:
+1. **Web app** — backend + frontend
+2. **CLI extraction** — `python main.py extract ...`
+3. **Batch mode** — `python main.py batch ...`
+
+### Main code areas
+- `main.py` — unified runner for web, CLI, batch, config
+- `src/api/` — FastAPI app and routes
+- `src/agents/` — analyzer/extractor/validator/orchestrator and related agent logic
+- `src/pipeline/` — pipeline orchestration and state
+- `src/preprocessing/` — PDF/image/doc/document preparation
+- `src/schemas/` — extraction schemas
+- `src/export/` — JSON / Excel / Markdown / FHIR-related export code
+- `src/security/` — auth, audit, encryption, PHI masking, path validation
+- `src/queue/` — Celery/Redis optional async processing support
+- `frontend/` — Next.js frontend
+
+### Document/file formats observed in code
+From `src/preprocessing/__init__.py` and `src/api/routes/documents.py`, the code is built to handle more than PDF.
+
+Observed supported formats:
+- PDF
+- PNG / JPG / JPEG / TIFF / TIF / BMP
+- DOCX / DOC
+- XLSX / CSV
+- DICOM (`.dcm`, `.dicom`)
+- EDI / X12 (`.edi`, `.x12`, `.835`, `.837`)
+
+### Schemas observed in code
+From `src/schemas/`:
+- bank statement
+- CMS-1500
+- EOB
+- form 1099
+- invoice
+- superbill
+- UB-04
+- W-2
+- generic fallback / enhanced generic
+
+### Frontend features observed in code
+From `frontend/src/app` and components:
+- dashboard
+- schemas browser
+- documents list / upload / detail page
+- tasks / queue monitoring
+- health page
+- login / signup pages
+- source/provenance viewer for extracted fields
+
+### Backend features observed in code
+From routes and modules:
+- auth endpoints
+- health endpoints
+- document upload / process / preview endpoints
+- schema listing / schema inspection endpoints
+- dashboard metrics endpoints
+- queue / task endpoints
+- webhooks
+- audit/security middleware
+- optional multi-tenant plumbing
 
 ---
 
-## Data Flow Diagram
+## 2. What we had to do to make this repo work locally
 
-```
-                              ┌──────────────┐
-                              │  PDF Upload  │
-                              └──────┬───────┘
-                                     │
-                                     ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│  STEP 1: PREPROCESSING                                                      │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  • PDF validation and metadata extraction                           │   │
-│  │  • Page-to-image conversion at 300 DPI (PyMuPDF)                    │   │
-│  │  • Image enhancement: deskew, denoise, contrast (OpenCV)            │   │
-│  │  • Memory-efficient streaming for large documents                    │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────┬───────────────────────────────────────┘
-                                     │
-                                     ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│  STEP 2: ORCHESTRATOR (LangGraph)                                           │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  • Initialize ExtractionState                                        │   │
-│  │  • Create checkpoint for recovery                                    │   │
-│  │  • Route to Analyzer agent                                           │   │
-│  │  • VLM Calls: 0                                                      │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────┬───────────────────────────────────────┘
-                                     │
-                                     ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│  STEP 3: ANALYZER                                                           │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  • Classify document type (CMS-1500, UB-04, EOB, Superbill)         │   │
-│  │  • Detect structure (tables, forms, handwriting)                     │   │
-│  │  • Analyze page relationships for multi-page docs                    │   │
-│  │  • Select appropriate extraction schema                              │   │
-│  │  • VLM Calls: 1 per document                                         │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────┬───────────────────────────────────────┘
-                                     │
-                                     ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│  STEP 4: EXTRACTOR (Dual-Pass)                                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  PASS 1: Standard extraction with schema                             │   │
-│  │     └──▶ Extract all fields, focus on completeness                   │   │
-│  │                                                                       │   │
-│  │  PASS 2: Verification extraction with different prompt               │   │
-│  │     └──▶ Re-extract with strict criteria                             │   │
-│  │                                                                       │   │
-│  │  COMPARE: Field-by-field comparison                                   │   │
-│  │     └──▶ Agreement = High confidence                                  │   │
-│  │     └──▶ Mismatch = Low confidence, flag for review                  │   │
-│  │                                                                       │   │
-│  │  • VLM Calls: 2 per page                                              │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────┬───────────────────────────────────────┘
-                                     │
-                                     ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│  STEP 5: VALIDATOR                                                          │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  • Schema validation against document type                           │   │
-│  │  • Hallucination pattern detection                                    │   │
-│  │  • Medical code validation (CPT, ICD-10, NPI)                        │   │
-│  │  • Cross-field rule validation                                        │   │
-│  │  • Cross-page data merging                                            │   │
-│  │  • Final confidence scoring                                           │   │
-│  │  • VLM Calls: 0-1 per document                                        │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────┬───────────────────────────────────────┘
-                                     │
-                                     ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│  STEP 6: CONFIDENCE ROUTING                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                                                                       │   │
-│  │     ┌─────────────────┐                                               │   │
-│  │     │ Confidence Score│                                               │   │
-│  │     └────────┬────────┘                                               │   │
-│  │              │                                                        │   │
-│  │     ┌────────┼────────┬─────────────────┐                            │   │
-│  │     ▼        ▼        ▼                 ▼                            │   │
-│  │  ┌──────┐ ┌──────┐ ┌──────────┐  ┌────────────┐                      │   │
-│  │  │ ≥0.85│ │0.50- │ │  <0.50   │  │   Error    │                      │   │
-│  │  │      │ │ 0.84 │ │          │  │            │                      │   │
-│  │  └──┬───┘ └──┬───┘ └────┬─────┘  └─────┬──────┘                      │   │
-│  │     │        │          │              │                              │   │
-│  │     ▼        ▼          ▼              ▼                              │   │
-│  │  ┌──────┐ ┌──────┐ ┌──────────┐  ┌────────────┐                      │   │
-│  │  │ AUTO │ │RETRY │ │  HUMAN   │  │   ERROR    │                      │   │
-│  │  │ACCEPT│ │ (x2) │ │  REVIEW  │  │  HANDLER   │                      │   │
-│  │  └──────┘ └──────┘ └──────────┘  └────────────┘                      │   │
-│  │                                                                       │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────┬───────────────────────────────────────┘
-                                     │
-                                     ▼
-                         ┌───────────────────────┐
-                         │   JSON + Excel Export │
-                         │     + Audit Log       │
-                         └───────────────────────┘
-```
+This repo did **not** come up cleanly as-is in the current checkout.
+
+The most important issues found and repaired are documented in detail in:
+- [`docs/SETUP_REPAIR_NOTES.md`](./docs/SETUP_REPAIR_NOTES.md)
+
+Short version:
+- installed missing Python and frontend dependencies
+- fixed WSL/Linux-unfriendly dependency checks in `main.py`
+- fixed frontend/backend local config mismatch
+- fixed dev CORS behavior so browser requests from `127.0.0.1:3000` can reach the backend
+- added missing frontend support files under `frontend/src/lib/`
+- added missing backend modules under `src/client/backends/`
+- added missing profile registry modules under `src/profiles/`
+- patched multi-record LM request formatting to improve JSON behavior
+
+Important: some of these were **repairs/compatibility layers**, not necessarily the author's original intended implementation.
 
 ---
 
-## 4-Agent Architecture
+## 3. External dependencies you need
 
-### Agent Overview
+## Required
 
-| Agent | Role | VLM Calls | Key Functions |
-|-------|------|-----------|---------------|
-| **Orchestrator** | State Machine Controller | 0 | Workflow control, error handling, checkpointing, retry logic |
-| **Analyzer** | Document Understanding | 1/doc | Classification, structure detection, schema selection |
-| **Extractor** | Data Extraction | 2/page | Dual-pass extraction, confidence scoring, visual grounding |
-| **Validator** | Quality Assurance | 0-1/doc | Hallucination detection, cross-page merging, output formatting |
+### Python
+- Python **3.11+**
+- tested here with **3.12.3**
 
-### LangGraph State Machine Flow
+### Node
+- Node **18+**
+- tested here with **20.20.1**
 
+### npm
+- required for frontend install and dev server
+
+### LM Studio
+Required for extraction behavior.
+
+Observed expected API endpoint in code:
+- `http://localhost:1234/v1`
+
+In practice we used:
+- `http://127.0.0.1:1234`
+
+### Redis
+Optional for queue-oriented features.
+- queue/task routes degrade reasonably if Redis is unavailable
+- some queue pages still expect queue endpoints to exist
+
+## Optional / feature-specific
+Depending on code path and features you use:
+- Celery workers
+- PHI-related extras
+- observability extras
+- FHIR extras
+
+---
+
+## 4. Local setup instructions
+
+These instructions reflect the working repaired setup.
+
+## A. Clone and enter repo
+```bash
+git clone <repo-url>
+cd papertrail2
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        LangGraph StateGraph Workflow                         │
-│                                                                              │
-│   ┌─────────────┐                                                           │
-│   │    START    │                                                           │
-│   └──────┬──────┘                                                           │
-│          │                                                                   │
-│          ▼                                                                   │
-│   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐                │
-│   │ PREPROCESS  │─────▶│   ANALYZE   │─────▶│   EXTRACT   │                │
-│   │             │      │             │      │             │                │
-│   │ PDF→Images  │      │ Classify &  │      │ Dual-Pass   │                │
-│   │ Enhancement │      │ Select      │      │ Extraction  │                │
-│   │             │      │ Schema      │      │             │                │
-│   └─────────────┘      └─────────────┘      └──────┬──────┘                │
-│                                                     │                        │
-│                                                     ▼                        │
-│                                              ┌─────────────┐                │
-│                                              │  VALIDATE   │                │
-│                                              │             │                │
-│                                              │ Check       │                │
-│                                              │ Quality     │                │
-│                                              └──────┬──────┘                │
-│                                                     │                        │
-│                        ┌────────────────────────────┼────────────────┐      │
-│                        │                            │                │      │
-│                        ▼                            ▼                ▼      │
-│               ┌─────────────┐              ┌─────────────┐   ┌──────────┐  │
-│               │   COMPLETE  │              │    RETRY    │   │  REVIEW  │  │
-│               │             │              │             │   │          │  │
-│               │ confidence  │              │ 0.50-0.84   │   │  <0.50   │  │
-│               │   ≥0.85     │              │ (max 2x)    │   │  Human   │  │
-│               └──────┬──────┘              └──────┬──────┘   └────┬─────┘  │
-│                      │                            │               │         │
-│                      │                            └───────────────┘         │
-│                      │                                    │                  │
-│                      ▼                                    ▼                  │
-│               ┌─────────────┐                      ┌─────────────┐          │
-│               │ FORMAT OUT  │                      │     END     │          │
-│               └──────┬──────┘                      └─────────────┘          │
-│                      │                                                       │
-│                      ▼                                                       │
-│               ┌─────────────┐                                               │
-│               │     END     │                                               │
-│               └─────────────┘                                               │
-│                                                                              │
-│   ═══════════════════════════════════════════════════════════════════════   │
-│   Checkpointing enabled at each state transition for recovery               │
-└─────────────────────────────────────────────────────────────────────────────┘
+
+## B. Create virtualenv
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+## C. Install Python packages
+Recommended:
+```bash
+pip install --upgrade pip setuptools wheel
+pip install -e ".[dev]"
+```
+
+If that is too heavy or problematic, the repo can still be made to boot with a more targeted install set, but `.[dev]` is the cleanest intended path.
+
+## D. Install frontend packages
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+## E. Create frontend local env
+Working value used here:
+```env
+# frontend/.env.local
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+NEXT_PUBLIC_AUTH_ENABLED=true
+NEXT_PUBLIC_ENABLE_BATCH_UPLOAD=true
+NEXT_PUBLIC_ENABLE_REAL_TIME_UPDATES=true
+```
+
+## F. Create/update backend `.env`
+This repo currently includes a tracked `.env` in this branch. If you are recreating manually, at minimum ensure:
+- LM Studio base URL points to your running instance
+- backend port matches where you actually launch FastAPI
+- secrets are set appropriately for your environment
+
+## G. Start LM Studio
+You need LM Studio running with a model loaded.
+
+Observed/default model references in code/config:
+- `qwen/qwen3-vl-8b`
+
+### Important LM Studio note
+From actual runtime testing, the extraction path behaves poorly if the effective context is too small.
+
+Recommended:
+- context window: **8192 minimum**
+- **32768 preferred** if available
+
+If LM Studio effectively runs at around `4096`, parts of the pipeline can fail with:
+- request/context overflow
+- malformed or truncated JSON
+
+---
+
+## 5. How to run
+
+## Preflight check
+```bash
+source .venv/bin/activate
+python main.py --check
+```
+
+## Run backend + frontend
+```bash
+source .venv/bin/activate
+python main.py
+```
+
+Expected:
+- backend on `http://127.0.0.1:8000` or `http://localhost:8000`
+- frontend on `http://127.0.0.1:3000` or `http://localhost:3000`
+
+## Run backend only
+```bash
+source .venv/bin/activate
+python main.py --backend
+```
+
+## Run frontend only
+```bash
+cd frontend
+npm run dev -- --port 3000
+```
+
+## CLI extract
+```bash
+source .venv/bin/activate
+python main.py extract path/to/file.pdf
+```
+
+Optional example:
+```bash
+python main.py extract path/to/file.pdf --output outdir --no-excel --no-markdown
+```
+
+## Batch mode
+```bash
+source .venv/bin/activate
+python main.py batch path/to/folder --parallel 4
 ```
 
 ---
 
-## 3-Layer Anti-Hallucination System
+## 6. How the app behaves at runtime
 
-### Layer Structure
+## Backend
+Observed launch target in code:
+- FastAPI app: `src.api.app:app`
 
+Useful backend URLs:
+- health: `http://127.0.0.1:8000/api/v1/health`
+- docs: `http://127.0.0.1:8000/docs`
+- schemas: `http://127.0.0.1:8000/api/v1/schemas`
+
+## Frontend
+Useful pages:
+- `/`
+- `/dashboard`
+- `/schemas`
+- `/documents`
+- `/documents/upload`
+- `/tasks`
+- `/health`
+
+---
+
+## 7. How to debug
+
+## A. Start with preflight
+```bash
+python main.py --check
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      3-LAYER ANTI-HALLUCINATION SYSTEM                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ╔═══════════════════════════════════════════════════════════════════════╗  │
-│  ║  LAYER 1: PROMPT ENGINEERING                                          ║  │
-│  ║  ─────────────────────────────────────────────────────────────────────║  │
-│  ║  • Visual grounding rules embedded in all prompts                     ║  │
-│  ║  • "Only extract values you can CLEARLY SEE"                          ║  │
-│  ║  • No guessing, no inference, no default values                       ║  │
-│  ║  • Confidence level required for each field                           ║  │
-│  ║  • Location description required (where found)                        ║  │
-│  ╚═══════════════════════════════════════════════════════════════════════╝  │
-│                                     │                                        │
-│                                     ▼                                        │
-│  ╔═══════════════════════════════════════════════════════════════════════╗  │
-│  ║  LAYER 2: DUAL-PASS EXTRACTION                                        ║  │
-│  ║  ─────────────────────────────────────────────────────────────────────║  │
-│  ║                                                                       ║  │
-│  ║  ┌─────────────┐      ┌─────────────┐      ┌─────────────────────┐   ║  │
-│  ║  │   PASS 1    │      │   PASS 2    │      │      COMPARE        │   ║  │
-│  ║  │  Standard   │      │ Verification│      │                     │   ║  │
-│  ║  │  Extraction │      │  Extraction │      │  Field-by-Field     │   ║  │
-│  ║  │             │      │  (Different │──────▶│  Comparison         │   ║  │
-│  ║  │  Focus:     │      │   Prompt)   │      │                     │   ║  │
-│  ║  │ Completeness│      │  Focus:     │      │  Match = High Conf  │   ║  │
-│  ║  │             │      │  Accuracy   │      │  Mismatch = Flag    │   ║  │
-│  ║  └─────────────┘      └─────────────┘      └─────────────────────┘   ║  │
-│  ╚═══════════════════════════════════════════════════════════════════════╝  │
-│                                     │                                        │
-│                                     ▼                                        │
-│  ╔═══════════════════════════════════════════════════════════════════════╗  │
-│  ║  LAYER 3: PATTERN + RULE VALIDATION                                   ║  │
-│  ║  ─────────────────────────────────────────────────────────────────────║  │
-│  ║                                                                       ║  │
-│  ║  ┌─────────────────────────────────────────────────────────────────┐ ║  │
-│  ║  │  Hallucination Pattern Detection                                │ ║  │
-│  ║  │  • Repetitive values across fields                              │ ║  │
-│  ║  │  • Suspiciously round numbers ($1000.00 exactly)                │ ║  │
-│  ║  │  • Placeholder patterns (N/A, TBD, XXX, 123)                    │ ║  │
-│  ║  │  • Type mismatches (text in numeric fields)                     │ ║  │
-│  ║  └─────────────────────────────────────────────────────────────────┘ ║  │
-│  ║                                                                       ║  │
-│  ║  ┌─────────────────────────────────────────────────────────────────┐ ║  │
-│  ║  │  Medical Code Validation                                        │ ║  │
-│  ║  │  • CPT codes: 5 digits or 4 digits + modifier                   │ ║  │
-│  ║  │  • ICD-10: Letter + 2 digits + optional decimal                 │ ║  │
-│  ║  │  • NPI: 10 digits with Luhn algorithm check                     │ ║  │
-│  ║  └─────────────────────────────────────────────────────────────────┘ ║  │
-│  ║                                                                       ║  │
-│  ║  ┌─────────────────────────────────────────────────────────────────┐ ║  │
-│  ║  │  Cross-Field Rule Validation                                    │ ║  │
-│  ║  │  • Date ordering (service date >= birth date)                   │ ║  │
-│  ║  │  • Math verification (line items = total)                       │ ║  │
-│  ║  │  • Required field dependencies                                  │ ║  │
-│  ║  └─────────────────────────────────────────────────────────────────┘ ║  │
-│  ╚═══════════════════════════════════════════════════════════════════════╝  │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+If this fails, fix install/config before debugging deeper runtime behavior.
+
+## B. Test backend health directly
+```bash
+python3 - <<'PY'
+import urllib.request
+with urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=10) as r:
+    print(r.status)
+    print(r.read().decode()[:500])
+PY
 ```
 
-### Confidence Score Actions
-
-| Score | Action | Description |
-|-------|--------|-------------|
-| ≥0.95 | Auto-Accept | High confidence, proceed to output |
-| 0.85-0.94 | Accept + Flag | Accept but flag for audit trail |
-| 0.70-0.84 | Verify | Request optional VLM verification |
-| 0.50-0.69 | Re-Extract | Retry extraction with adjusted prompts |
-| <0.50 | Human Review | Route to human review queue |
-
----
-
-## Context Management with Mem0
-
-### Overview
-
-The system integrates **Mem0** as the persistent memory layer to maintain context across extraction sessions, enable learning from corrections, and provide intelligent document processing based on historical patterns.
-
-### Memory Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         MEM0 MEMORY ARCHITECTURE                             │
-│                                                                              │
-│   ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐         │
-│   │   EXTRACTION    │    │    DOCUMENT     │    │   CORRECTION    │         │
-│   │    CONTEXT      │    │    PATTERNS     │    │    HISTORY      │         │
-│   │                 │    │                 │    │                 │         │
-│   │ • Current doc   │    │ • Schema maps   │    │ • User fixes    │         │
-│   │ • Field values  │    │ • Field layouts │    │ • Error patterns│         │
-│   │ • Page context  │    │ • Provider info │    │ • Improvements  │         │
-│   └────────┬────────┘    └────────┬────────┘    └────────┬────────┘         │
-│            │                      │                      │                   │
-│            └──────────────────────┼──────────────────────┘                   │
-│                                   │                                          │
-│                                   ▼                                          │
-│            ┌─────────────────────────────────────────┐                      │
-│            │            MEM0 MEMORY STORE            │                      │
-│            │                                         │                      │
-│            │  ┌─────────────┐    ┌─────────────┐    │                      │
-│            │  │   VECTOR    │    │    GRAPH    │    │                      │
-│            │  │   STORE     │    │    STORE    │    │                      │
-│            │  │  (Qdrant)   │    │   (Neo4j)   │    │                      │
-│            │  └─────────────┘    └─────────────┘    │                      │
-│            └─────────────────────────────────────────┘                      │
-│                                                                              │
-│  OPERATIONS: ADD → SEARCH → UPDATE → DELETE                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
+## C. Test LM Studio directly
+```bash
+python3 - <<'PY'
+import urllib.request
+with urllib.request.urlopen('http://127.0.0.1:1234/v1/models', timeout=10) as r:
+    print(r.status)
+    print(r.read().decode()[:500])
+PY
 ```
 
-### Memory Integration Flow
-
+## D. Watch frontend logs
+```bash
+cd frontend
+npm run dev -- --port 3000
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      MEM0 INTEGRATION WITH LANGGRAPH                         │
-│                                                                              │
-│   NEW DOC ──▶ CONTEXT RETRIEVAL ──▶ CONTEXT-AWARE EXTRACTION                │
-│                     │                         │                              │
-│                     ▼                         ▼                              │
-│              ┌─────────────┐          ┌─────────────┐                       │
-│              │ Mem0 Search │          │  Enhanced   │                       │
-│              │             │          │  Prompts    │                       │
-│              │ • Similar   │          │             │                       │
-│              │   documents │          │ Higher      │                       │
-│              │ • Provider  │          │ accuracy    │                       │
-│              │   patterns  │          │ from        │                       │
-│              │ • Past      │          │ context     │                       │
-│              │   corrections│         │             │                       │
-│              └─────────────┘          └─────────────┘                       │
-│                                              │                               │
-│                                              ▼                               │
-│              ┌─────────────────────────────────────────────┐                │
-│              │           MEMORY STORAGE                     │                │
-│              │                                              │                │
-│              │  Extraction Results ──▶ Mem0 Add ──▶ Future │                │
-│              │                                     Context  │                │
-│              └─────────────────────────────────────────────┘                │
-│                                              │                               │
-│                                              ▼                               │
-│              ┌─────────────────────────────────────────────┐                │
-│              │        CORRECTION LEARNING (Optional)        │                │
-│              │                                              │                │
-│              │  Human Fix ──▶ Mem0 Update ──▶ Self-Improving│                │
-│              └─────────────────────────────────────────────┘                │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+If the page compiles but shows no data, check:
+- browser devtools network tab
+- backend CORS/origin config
+- `frontend/.env.local`
+
+## E. Watch backend logs
+The code writes logs under `logs/` and additional local bring-up logs may exist under `.setup-logs/`.
+
+Useful checks:
+```bash
+tail -f logs/extraction_*.log
+```
+or
+```bash
+tail -f .setup-logs/backend.log
 ```
 
-### Memory Types
-
-| Memory Type | Purpose | Retention |
-|-------------|---------|-----------|
-| **Session Memory** | Current document context | Session lifetime |
-| **Document Memory** | Historical extraction results | Configurable |
-| **Schema Memory** | Document type patterns | Permanent |
-| **Correction Memory** | User corrections and fixes | Permanent |
-| **Provider Memory** | Healthcare provider patterns | Permanent |
-
-### Local Deployment (HIPAA Compliant)
-
-| Component | Local Configuration |
-|-----------|---------------------|
-| **Vector Store** | Qdrant (localhost:6333) |
-| **Graph Store** | Neo4j (localhost:7687) |
-| **Embedding Model** | Local Sentence Transformers |
-| **LLM for Memory** | LM Studio (localhost:1234) |
-
-### Benefits
-
-| Benefit | Impact |
-|---------|--------|
-| **Higher Accuracy** | +5-10% field accuracy from context |
-| **Faster Processing** | -20% time by skipping re-learning |
-| **Fewer Reviews** | -30% human review rate |
-| **Self-Improving** | Continuous accuracy gains from corrections |
-
----
-
-## Quick Start
-
-## Technology Stack
-
-### Core Components
-
-| Component | Technology | Version | Purpose |
-|-----------|------------|---------|---------|
-| **VLM Model** | Qwen3-VL 8B | Q4_K_M | Vision Language Model for extraction |
-| **Model Backend** | LM Studio | Latest | Local model serving (OpenAI-compatible API) |
-| **Agent Framework** | LangGraph | ≥1.0.0 | Graph-based agent orchestration |
-| **LLM Framework** | LangChain | ≥1.0.0 | Core LLM/agent development framework |
-| **Checkpointing** | LangGraph Checkpoint | ≥2.0.6 | State persistence and recovery |
-| **Runtime** | Python | 3.11+ | Core programming language |
-
-### Required Packages (November 2025)
-
-| Category | Package | Version | Purpose |
-|----------|---------|---------|---------|
-| **Agent Framework** | langchain | ≥1.0.0 | LangChain core framework |
-| | langchain-core | ≥0.3.25 | Core abstractions |
-| | langchain-community | ≥0.3.12 | Community integrations |
-| | langgraph | ≥1.0.0 | Graph-based agent orchestration |
-| | langgraph-checkpoint | ≥2.0.10 | Checkpointing for LangGraph |
-| **Memory Layer** | mem0ai | ≥0.1.29 | Persistent memory for AI agents |
-| | qdrant-client | ≥1.12.0 | Vector database client |
-| | neo4j | ≥5.25.0 | Graph database client |
-| | sentence-transformers | ≥3.3.0 | Local embedding models |
-| **VLM Client** | openai | ≥1.55.0 | OpenAI-compatible client for LM Studio |
-| | tenacity | ≥9.0.0 | Retry logic with exponential backoff |
-| **PDF Processing** | PyMuPDF | ≥1.25.0 | PDF to image conversion |
-| | Pillow | ≥11.0.0 | Image processing |
-| | opencv-python | ≥4.10.0 | Advanced image enhancement |
-| **Data Validation** | pydantic | ≥2.10.0 | Data validation and schemas |
-| | pydantic-settings | ≥2.6.0 | Settings management |
-| **API Framework** | fastapi | ≥0.115.0 | REST API framework |
-| | uvicorn | ≥0.32.0 | ASGI server |
-| | python-multipart | ≥0.0.17 | File upload support |
-| **Task Queue** | celery | ≥5.4.0 | Distributed task queue |
-| | redis | ≥5.2.0 | Message broker & result backend |
-| **Security** | cryptography | ≥43.0.0 | AES-256 encryption |
-| | python-jose | ≥3.3.0 | JWT handling |
-| **Export** | openpyxl | ≥3.1.5 | Excel export |
-| | pandas | ≥2.2.0 | Data manipulation |
-| **UI** | streamlit | ≥1.40.0 | Web UI framework |
-| **Monitoring** | prometheus-client | ≥0.21.0 | Prometheus metrics |
-| | structlog | ≥24.4.0 | Structured logging |
-| **Testing** | pytest | ≥8.3.0 | Testing framework |
-| | pytest-asyncio | ≥0.24.0 | Async test support |
-| | pytest-cov | ≥6.0.0 | Coverage reporting |
-| **Development** | black | ≥24.10.0 | Code formatting |
-| | ruff | ≥0.8.0 | Fast linting |
-| | mypy | ≥1.13.0 | Type checking |
-
-### Documentation Links for Implementation
-
-These links provide official documentation to assist AI coding agents and developers in implementing the system:
-
-#### Agent Framework & LLM
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| LangChain | https://python.langchain.com/docs/introduction/ |
-| LangGraph | https://langchain-ai.github.io/langgraph/ |
-| LangGraph Tutorials | https://langchain-ai.github.io/langgraph/tutorials/ |
-| LangGraph Checkpointing | https://langchain-ai.github.io/langgraph/concepts/persistence/ |
-| LangChain OpenAI Integration | https://python.langchain.com/docs/integrations/platforms/openai/ |
-
-#### Memory Layer
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Mem0 Overview | https://docs.mem0.ai/overview |
-| Mem0 Quickstart | https://docs.mem0.ai/quickstart |
-| Mem0 Platform Features | https://docs.mem0.ai/features |
-| Mem0 Python SDK | https://docs.mem0.ai/sdks/python |
-| Mem0 LLM Configuration | https://docs.mem0.ai/components/llms/overview |
-| Mem0 Vector Stores | https://docs.mem0.ai/components/vectordbs/overview |
-| Mem0 Embedding Models | https://docs.mem0.ai/components/embedders/overview |
-
-#### VLM & Model Serving
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| LM Studio | https://lmstudio.ai/docs |
-| OpenAI Python SDK | https://platform.openai.com/docs/api-reference |
-| OpenAI Vision Guide | https://platform.openai.com/docs/guides/vision |
-
-#### PDF Processing
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| PyMuPDF | https://pymupdf.readthedocs.io/en/latest/ |
-| PyMuPDF Tutorial | https://pymupdf.readthedocs.io/en/latest/tutorial.html |
-| Pillow | https://pillow.readthedocs.io/en/stable/ |
-| OpenCV Python | https://docs.opencv.org/4.x/d6/d00/tutorial_py_root.html |
-
-#### Data Validation
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Pydantic | https://docs.pydantic.dev/latest/ |
-| Pydantic Settings | https://docs.pydantic.dev/latest/concepts/pydantic_settings/ |
-| Pydantic Validators | https://docs.pydantic.dev/latest/concepts/validators/ |
-
-#### API Framework
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| FastAPI | https://fastapi.tiangolo.com/ |
-| FastAPI Tutorial | https://fastapi.tiangolo.com/tutorial/ |
-| Uvicorn | https://www.uvicorn.org/ |
-
-#### Task Queue
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Celery | https://docs.celeryq.dev/en/stable/ |
-| Celery Getting Started | https://docs.celeryq.dev/en/stable/getting-started/introduction.html |
-
-#### UI Framework
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Streamlit | https://docs.streamlit.io/ |
-| Streamlit API Reference | https://docs.streamlit.io/develop/api-reference |
-| Streamlit Components | https://docs.streamlit.io/develop/concepts/custom-components |
-
-#### Vector Databases
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Qdrant | https://qdrant.tech/documentation/ |
-| Qdrant Python Client | https://qdrant.tech/documentation/quickstart/ |
-| FAISS | https://faiss.ai/documentation.html |
-| FAISS Tutorial | https://github.com/facebookresearch/faiss/wiki/Getting-started |
-
-#### Embeddings
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Sentence Transformers | https://www.sbert.net/ |
-| Sentence Transformers Models | https://www.sbert.net/docs/pretrained_models.html |
-| HuggingFace Transformers | https://huggingface.co/docs/transformers/ |
-
-#### Testing
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Pytest | https://docs.pytest.org/en/stable/ |
-| Pytest Asyncio | https://pytest-asyncio.readthedocs.io/en/latest/ |
-| HTTPX | https://www.python-httpx.org/ |
-
-#### Monitoring
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Prometheus Python | https://prometheus.github.io/client_python/ |
-| Structlog | https://www.structlog.org/en/stable/ |
-
-#### Development Tools
-
-| Component | Documentation URL |
-|-----------|-------------------|
-| Black | https://black.readthedocs.io/en/stable/ |
-| Ruff | https://docs.astral.sh/ruff/ |
-| Mypy | https://mypy.readthedocs.io/en/stable/ |
-
----
-
-## Project Structure
-
+## F. Validate a specific endpoint manually
+Example:
+```bash
+python3 - <<'PY'
+import urllib.request
+with urllib.request.urlopen('http://127.0.0.1:8000/api/v1/schemas', timeout=10) as r:
+    print(r.status)
+    print(r.read().decode()[:1000])
+PY
 ```
-doc-extraction-system/
-│
-├── README.md                          # This file
-├── PRD.md                             # Product Requirements Document
-├── requirements.txt                   # Python dependencies
-├── .env.example                       # Environment template
-│
-├── src/
-│   ├── config/
-│   │   ├── settings.py                # Application settings
-│   │   └── logging_config.py          # Logging configuration
-│   │
-│   ├── preprocessing/
-│   │   ├── pdf_processor.py           # PDF to image conversion (300 DPI)
-│   │   ├── image_enhancer.py          # OpenCV image enhancement
-│   │   └── batch_manager.py           # Batch processing manager
-│   │
-│   ├── client/
-│   │   ├── lm_client.py               # LM Studio client
-│   │   ├── connection_manager.py      # Connection pooling
-│   │   └── health_monitor.py          # Health checks
-│   │
-│   ├── schemas/
-│   │   ├── base.py                    # Base schema classes
-│   │   ├── validators.py              # Field validators
-│   │   ├── cms1500.py                 # CMS-1500 schema
-│   │   ├── ub04.py                    # UB-04 schema
-│   │   ├── eob.py                     # EOB schema
-│   │   └── superbill.py               # Superbill schema
-│   │
-│   ├── agents/
-│   │   ├── base.py                    # Base agent class
-│   │   ├── orchestrator.py            # Orchestrator agent (LangGraph)
-│   │   ├── analyzer.py                # Analyzer agent
-│   │   ├── extractor.py               # Extractor agent (dual-pass)
-│   │   ├── validator.py               # Validator agent
-│   │   ├── optimization.py            # Agent optimization framework
-│   │   ├── optimization_integration.py # Optimization integration
-│   │   └── utils.py                   # Agent utilities
-│   │
-│   ├── prompts/
-│   │   ├── grounding_rules.py         # Anti-hallucination rules
-│   │   ├── classification.py          # Document classification prompts
-│   │   ├── extraction.py              # Data extraction prompts
-│   │   └── validation.py              # Validation prompts
-│   │
-│   ├── validation/
-│   │   ├── dual_pass.py               # Dual-pass comparison logic
-│   │   ├── pattern_detector.py        # Hallucination pattern detection
-│   │   ├── confidence.py              # Confidence scoring
-│   │   ├── medical_codes.py           # CPT/ICD-10/NPI validation
-│   │   └── cross_field.py             # Cross-field validation rules
-│   │
-│   ├── memory/
-│   │   ├── mem0_client.py             # Mem0 client wrapper
-│   │   ├── context_manager.py         # Context retrieval and storage
-│   │   ├── correction_tracker.py      # Track user corrections
-│   │   └── vector_store.py            # Qdrant vector store config
-│   │
-│   ├── pipeline/
-│   │   ├── state.py                   # ExtractionState definition
-│   │   ├── graph.py                   # LangGraph workflow
-│   │   └── runner.py                  # Pipeline executor
-│   │
-│   ├── api/
-│   │   ├── app.py                     # FastAPI application
-│   │   ├── middleware.py              # Request middleware
-│   │   ├── models.py                  # Pydantic API models
-│   │   └── routes/
-│   │       ├── auth.py                # Authentication endpoints
-│   │       ├── dashboard.py           # Dashboard stats
-│   │       ├── documents.py           # Document management
-│   │       ├── health.py              # GET /api/v1/health
-│   │       ├── queue.py               # Queue management
-│   │       ├── schemas.py             # Schema endpoints
-│   │       └── tasks.py               # Task management
-│   │
-│   ├── export/
-│   │   ├── excel_exporter.py          # Multi-sheet Excel export
-│   │   └── json_exporter.py           # JSON export with metadata
-│   │
-│   ├── security/
-│   │   ├── encryption.py              # AES-256 encryption
-│   │   ├── audit.py                   # Audit logging
-│   │   └── data_cleanup.py            # Secure file cleanup
-│   │
-│   └── monitoring/
-│       ├── metrics.py                 # Prometheus metrics
-│       └── alerts.py                  # Alert definitions
-│
-├── tests/
-│   ├── unit/                          # Unit tests
-│   ├── integration/                   # Integration tests
-│   └── test_*.py                      # Test modules
-│
-├── docker/
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   ├── docker-compose.prod.yml
-│   └── prometheus.yml                 # Prometheus scrape config
-│
-├── .github/
-│   ├── workflows/
-│   │   └── ci.yml                     # CI/CD pipeline
-│   └── dependabot.yml                 # Automated dependency updates
-│
-├── docs/
-│   └── AGENT_OPTIMIZATION_REPORT.md   # Agent optimization analysis
+
+## G. Debug extraction with a tiny test PDF
+A small smoke test is useful before running on large real documents.
+
+Observed locally, extraction can fail for two separate reasons:
+1. code/runtime/import issues
+2. LM Studio/model behavior issues
+
+If the app boots but extraction quality is poor, inspect LM Studio context/model settings first.
+
+---
+
+## 8. Known observed problems
+
+These are based on actual bring-up/testing of the current branch.
+
+### 1. LM output instability
+Even with runtime repairs, the model can still produce:
+- malformed JSON
+- truncated JSON
+- low-confidence / empty extraction output
+
+This is especially visible in multi-record mode.
+
+### 2. Context window pressure
+Several VLM requests in the pipeline exceed an effective context limit when LM Studio is configured too tightly.
+
+### 3. Frontend/backend depth mismatch
+The frontend expects a richer persisted document/task world than the backend fully guarantees in all code paths.
+
+Result:
+- some pages work well for live/static endpoints like `/schemas`
+- others are only partially useful unless more persistence/state plumbing is completed
+
+### 4. Queue/task UX is optional-path sensitive
+The code degrades when Redis/Celery are unavailable, but some task/queue UI flows are much more meaningful if those services are actually running.
+
+---
+
+## 9. Observed feature summary
+
+Based on code inspection and runtime tests, the repo currently contains:
+- local VLM-based extraction via LM Studio
+- CLI + web entry points
+- FastAPI backend with multiple document-related APIs
+- schema-based extraction support
+- preprocessing for many input document/image formats
+- export support for JSON / Excel / Markdown and FHIR-related paths
+- security-related middleware and helpers
+- queue/webhook plumbing
+- Next.js UI with dashboards, schema browser, document flows, and provenance/source-view components
+
+---
+
+## 10. WSL-specific notes
+
+This repo was brought up from a path under `/mnt/e/...`.
+
+That works, but for better performance you may prefer moving the repo into the native WSL filesystem, e.g.:
+```bash
+~/code/papertrail2
 ```
----
 
-## Performance Metrics
-
-| Metric | Target | Actual |
-|--------|--------|--------|
-| Field Extraction Accuracy | >95% | 97%+ |
-| Hallucination Rate | <2% | <1% |
-| Processing Speed | 15-25 sec/page | 18 sec avg |
-| VLM Calls per Page | 3-4 | 3.2 avg |
-| System Uptime | >99.5% | 99.9% |
-| Human Review Rate | <10% | <5% |
-
-### Capacity Planning
-
-| Configuration | Throughput |
-|--------------|------------|
-| Single RTX 4090 | 50-100 pages/hour |
-| Multi-GPU (2x) | 200-400 pages/hour |
-| Distributed | Scales linearly |
+Why:
+- faster Node/Next.js file operations
+- faster Python venv access
+- fewer watcher/cache oddities
 
 ---
 
-## Security & Compliance
+## 11. Recommended bring-up checklist
 
-### HIPAA Compliance
-
-| Feature | Implementation |
-|---------|----------------|
-| **100% Local Processing** | No PHI leaves the system |
-| **No Cloud APIs** | All AI processing done locally via LM Studio |
-| **Encrypted Storage** | AES-256 encryption for data at rest |
-| **Audit Logging** | Complete action trail with timestamps |
-| **Secure Cleanup** | Automatic PHI deletion with secure overwrite |
-
-### Security Features
-
-- Role-Based Access Control (RBAC)
-- Input validation and sanitization
-- Secure temporary file handling
-- PHI masking in logs
-- Automatic data retention policies
-- Network isolation (localhost only)
+1. Start LM Studio and load the intended vision model
+2. Ensure LM Studio context is sufficiently large
+3. `source .venv/bin/activate`
+4. `python main.py --check`
+5. `python main.py`
+6. open `http://127.0.0.1:3000/schemas`
+7. verify `http://127.0.0.1:8000/api/v1/health`
+8. only then test extraction
 
 ---
 
-## Development Phases
+## 12. If you want the full repair history
+See:
+- [`docs/SETUP_REPAIR_NOTES.md`](./docs/SETUP_REPAIR_NOTES.md)
 
-### Phase 1: Core Infrastructure ✅
-- [x] PDF Processor module (300 DPI)
-- [x] Image enhancement pipeline
-- [x] LM Studio client with retry logic
-- [x] Schema definition system
-- [x] Healthcare RCM schemas
-
-### Phase 2: Agent Framework ✅
-- [x] LangGraph state machine
-- [x] Orchestrator agent
-- [x] Analyzer agent
-- [x] Extractor agent (dual-pass)
-- [x] Validator agent
-
-### Phase 3: Anti-Hallucination System ✅
-- [x] System Prompt engineering layer (For Zero Shot and Expert level of understanding)
-- [x] Dual-pass extraction
-- [x] Pattern validation
-- [x] Confidence scoring
-- [ ] Human-in-the-loop (RLHF Reinforcement Learning)
-
-### Phase 4: Integration & Testing ✅
-- [x] Task queue (Celery + Redis)
-- [x] Test suites
-- [x] CI/CD pipeline
-
-### Phase 5: Deployment (In Progress)
-- [ ] HIPAA compliance verification
-- [x] Monitoring & alerting
-- [x] Documentation
-- [ ] Production launch
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| LM Studio not responding | Check if server is running on port 1234 |
-| Model not loading | Verify GPU VRAM is sufficient for quantization |
-| Slow processing | Ensure GPU layers are maximized |
-| Low accuracy | Check image quality, try higher DPI |
-| Memory errors | Reduce batch size or use smaller quantization |
-
----
-
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## License
-
-Copyright 2024-2025. All rights reserved.
-
----
-
-## Contact
-
-For support or inquiries, please contact the development team.
-
----
-
-*Built with 100% local AI for enterprise healthcare data extraction.*
-
-**Version:** 2.0.0
-**Last Updated:** November 2025
-**Framework:** LangChain 1.x + LangGraph 1.x
+That file contains the repair-focused history: issues found, stubs added, and exact classes of changes made to get the repo working.
