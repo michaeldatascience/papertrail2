@@ -1,0 +1,23 @@
+
+> pdf-extraction-frontend@1.0.0 dev
+> next dev --port 3000
+
+  ▲ Next.js 14.2.33
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 11.1s
+ ○ Compiling /schemas ...
+ ✓ Compiled /schemas in 14.1s (1390 modules)
+ GET /schemas 200 in 15236ms
+ ✓ Compiled in 1191ms (702 modules)
+ GET /schemas 200 in 111ms
+ ⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /documents/upload ...
+ ✓ Compiled /documents/upload in 1562ms (1442 modules)
+ ✓ Compiled /tasks in 438ms (1456 modules)
+ ○ Compiling /health ...
+ ✓ Compiled /health in 519ms (1472 modules)
+ ✓ Compiled /dashboard in 514ms (1512 modules)

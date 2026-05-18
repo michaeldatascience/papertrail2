@@ -1,90 +1,20 @@
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-node_modules/
-nul
-.next
-.ruff_cache/
-medical/
-medical_outputs/
-
-# Virtual environment
+# Local Python environments
 .venv/
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
-.env
-.env.local
-env
 
-# IDE
-.vscode/
-.idea/
-.claude/
-*.swp
-*.swo
+# Installed Node dependencies / build output
+node_modules/
+frontend/node_modules/
+.next/
+frontend/.next/
 
-# Temporary files
-temp/
-tmp/
-*.tmp
-output/
-smoke_test*
-tmp_smoke_test.py
+# Python cache artifacts
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Streamlit
-.streamlit/
-
-# Logs
-*.log
-logs/
-.setup-logs/
-
-# Data files (PHI protection)
-uploads/
-extracted_data/
-temp_images/
-
-# LangGraph durable checkpoints (may contain in-flight PHI)
-.extraction_checkpoints/
-
-
-# SEC-MED-004: User data with password hashes should not be in repository
-data/users.json
-data/memory/
-data/revoked_tokens.json
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Azure
-azure.log
+# Local-only metadata overrides
+*.egg-info/
+.claude/settings.local.json

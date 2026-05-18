@@ -1,0 +1,161 @@
+2026-05-18 13:34:00 [info     ] cors_origins_extended_for_dev  configured=['http://localhost:8501'] effective=['http://localhost:8501', 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3055', 'http://127.0.0.1:3055']
+2026-05-18 13:34:01 [info     ] security_headers_middleware_enabled
+2026-05-18 13:34:01 [info     ] metrics_middleware_enabled
+2026-05-18 13:34:01 [info     ] audit_middleware_enabled
+2026-05-18 13:34:01 [info     ] rate_limit_middleware_enabled
+2026-05-18 13:34:01 [warning  ] authentication_middleware_disabled note='Production deployments must set API_AUTH_ENABLED=true or AUTH_BYPASS_ACK=acknowledged' reason='api.auth_enabled=False'
+2026-05-18 13:34:01 [info     ] tenant_resolver_middleware_enabled default_tenant=default multi_tenant=False
+INFO:     Started server process [39459]
+INFO:     Waiting for application startup.
+2026-05-18 13:34:03 [info     ] api_startup                    version=1.0.0
+2026-05-18 13:34:03 [info     ] metrics_initialized
+2026-05-18 13:34:03 [info     ] rule_added                     rule=high_error_rate
+2026-05-18 13:34:03 [info     ] rule_added                     rule=low_extraction_accuracy
+2026-05-18 13:34:03 [info     ] rule_added                     rule=vlm_unavailable
+2026-05-18 13:34:03 [info     ] rule_added                     rule=high_queue_depth
+2026-05-18 13:34:03 [info     ] rule_added                     rule=slow_extraction
+2026-05-18 13:34:03 [info     ] rule_added                     rule=high_hallucination_rate
+2026-05-18 13:34:03 [info     ] rule_added                     rule=security_breach_attempt
+2026-05-18 13:34:03 [info     ] rule_added                     rule=disk_space_low
+2026-05-18 13:34:03 [info     ] rule_added                     rule=memory_high
+2026-05-18 13:34:03 [info     ] rule_added                     rule=phi_access_anomaly
+2026-05-18 13:34:03 [info     ] alerts_initialized
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-05-18 13:34:06 [info     ] api.request                    client_ip=127.0.0.1 event_id=ef935277-fb32-4658-8bbb-da9685d8562b message='GET /api/v1/health -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/health', 'http_status': 200, 'query_params': None} outcome=success request_id=9345112e7a4a4367b17fb226cf21826e
+2026-05-18 13:34:06 [info     ] request_completed              duration_ms=11.28 method=GET path=/api/v1/health request_id=9345112e7a4a4367b17fb226cf21826e status_code=200
+INFO:     127.0.0.1:45711 - "GET /api/v1/health HTTP/1.1" 200 OK
+2026-05-18 13:34:06 [info     ] list_schemas_request           request_id=eabdec7faea948d3b1d0e26740b31d46
+2026-05-18 13:34:06 [info     ] api.request                    client_ip=127.0.0.1 event_id=086a4473-d117-41f5-a833-2958b4bb9a48 message='GET /api/v1/schemas -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/schemas', 'http_status': 200, 'query_params': None} outcome=success request_id=eabdec7faea948d3b1d0e26740b31d46
+2026-05-18 13:34:06 [info     ] request_completed              duration_ms=11.13 method=GET path=/api/v1/schemas request_id=eabdec7faea948d3b1d0e26740b31d46 status_code=200
+INFO:     127.0.0.1:45713 - "GET /api/v1/schemas HTTP/1.1" 200 OK
+2026-05-18 13:34:06 [info     ] list_schemas_request           request_id=17a17da44440487ab55f19afc8d93f1f
+2026-05-18 13:34:06 [info     ] api.request                    client_ip=127.0.0.1 event_id=6e7f8713-01ad-41ad-8e46-7fe9446da8ce message='GET /api/v1/schemas -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/schemas', 'http_status': 200, 'query_params': None} outcome=success request_id=17a17da44440487ab55f19afc8d93f1f
+2026-05-18 13:34:06 [info     ] request_completed              duration_ms=1.4 method=GET path=/api/v1/schemas request_id=17a17da44440487ab55f19afc8d93f1f status_code=200
+INFO:     127.0.0.1:45721 - "GET /api/v1/schemas HTTP/1.1" 200 OK
+2026-05-18 13:34:53 [info     ] dashboard_metrics_request      request_id=f3c302960fcd428c8edffb8423964fa1
+2026-05-18 13:34:53 [info     ] dashboard_activity_request     limit=10 request_id=c5a09bd36a1c4bdc975229fd3ea94a49
+2026-05-18 13:34:53 [info     ] list_active_tasks_request      request_id=55bbe715fb74481ea32834e91ecb66a5
+2026-05-18 13:34:58 [info     ] queue_stats_request            request_id=de25498990374344a7da0acdecbeb9ff
+2026-05-18 13:35:00 [info     ] api.request                    client_ip=127.0.0.1 event_id=39a0473a-4c70-4308-b5a4-7fdac5e3c480 message='GET /api/v1/dashboard/metrics -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/metrics', 'http_status': 200, 'query_params': None} outcome=success request_id=de25498990374344a7da0acdecbeb9ff
+2026-05-18 13:35:00 [info     ] api.request                    client_ip=127.0.0.1 event_id=bd01bbf0-2e44-4df5-99be-974f64d7fb4f message='GET /api/v1/dashboard/activity -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/activity', 'http_status': 200, 'query_params': 'limit=10'} outcome=success
+2026-05-18 13:35:00 [warning  ] api.error                      client_ip=127.0.0.1 event_id=72ce6c92-ab47-445c-984a-776173ef20c1 message='GET /api/v1/health/detailed -> 403' metadata={'http_method': 'GET', 'http_path': '/api/v1/health/detailed', 'http_status': 403, 'query_params': None} outcome=failure
+2026-05-18 13:35:00 [info     ] api.request                    client_ip=127.0.0.1 event_id=24d9df89-1909-494e-b3ca-793eed3cdcfb message='GET /api/v1/tasks/active -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/tasks/active', 'http_status': 200, 'query_params': None} outcome=success
+2026-05-18 13:35:00 [info     ] api.request                    client_ip=127.0.0.1 event_id=26c23f93-3201-4b73-a218-186461f5c23c message='GET /api/v1/queue/stats -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/queue/stats', 'http_status': 200, 'query_params': None} outcome=success
+2026-05-18 13:35:00 [info     ] request_completed              duration_ms=7148.75 method=GET path=/api/v1/dashboard/metrics request_id=f3c302960fcd428c8edffb8423964fa1 status_code=200
+INFO:     127.0.0.1:57199 - "GET /api/v1/dashboard/metrics HTTP/1.1" 200 OK
+2026-05-18 13:35:00 [info     ] request_completed              duration_ms=7149.04 method=GET path=/api/v1/dashboard/activity request_id=c5a09bd36a1c4bdc975229fd3ea94a49 status_code=200
+INFO:     127.0.0.1:51042 - "GET /api/v1/dashboard/activity?limit=10 HTTP/1.1" 200 OK
+2026-05-18 13:35:00 [info     ] request_completed              duration_ms=7149.53 method=GET path=/api/v1/health/detailed request_id=b9fa717b09d34d4d93b8580b80fc5a5d status_code=403
+INFO:     127.0.0.1:57536 - "GET /api/v1/health/detailed HTTP/1.1" 403 Forbidden
+2026-05-18 13:35:00 [info     ] request_completed              duration_ms=7150.0 method=GET path=/api/v1/tasks/active request_id=55bbe715fb74481ea32834e91ecb66a5 status_code=200
+INFO:     127.0.0.1:53425 - "GET /api/v1/tasks/active HTTP/1.1" 200 OK
+2026-05-18 13:35:00 [info     ] request_completed              duration_ms=7148.08 method=GET path=/api/v1/queue/stats request_id=de25498990374344a7da0acdecbeb9ff status_code=200
+INFO:     127.0.0.1:52634 - "GET /api/v1/queue/stats HTTP/1.1" 200 OK
+2026-05-18 13:35:00 [info     ] api.request                    client_ip=127.0.0.1 event_id=04906f9e-4077-4c5c-b4bc-4274b5dc3ea4 message='GET /api/v1/health -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/health', 'http_status': 200, 'query_params': None} outcome=success request_id=efd6d8120564449cbb7aa728283b80bf
+2026-05-18 13:35:00 [info     ] request_completed              duration_ms=1.89 method=GET path=/api/v1/health request_id=efd6d8120564449cbb7aa728283b80bf status_code=200
+INFO:     127.0.0.1:52634 - "GET /api/v1/health HTTP/1.1" 200 OK
+2026-05-18 13:35:16 [warning  ] api.error                      client_ip=127.0.0.1 event_id=9330c1cd-cce7-4da3-86f3-f1123a24728f message='GET /api/v1/health/detailed -> 403' metadata={'http_method': 'GET', 'http_path': '/api/v1/health/detailed', 'http_status': 403, 'query_params': None} outcome=failure request_id=45547e0ef0264dd198c5e1aa0ebaccc8
+2026-05-18 13:35:16 [info     ] request_completed              duration_ms=2.43 method=GET path=/api/v1/health/detailed request_id=45547e0ef0264dd198c5e1aa0ebaccc8 status_code=403
+INFO:     127.0.0.1:64164 - "GET /api/v1/health/detailed HTTP/1.1" 403 Forbidden
+2026-05-18 13:35:16 [info     ] api.request                    client_ip=127.0.0.1 event_id=2994a018-5e61-4f6e-af79-584e03fd4cd1 message='GET /api/v1/health -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/health', 'http_status': 200, 'query_params': None} outcome=success request_id=f44b49d75d7a4dc18d363237cb00b329
+2026-05-18 13:35:16 [info     ] request_completed              duration_ms=1.46 method=GET path=/api/v1/health request_id=f44b49d75d7a4dc18d363237cb00b329 status_code=200
+INFO:     127.0.0.1:64164 - "GET /api/v1/health HTTP/1.1" 200 OK
+2026-05-18 13:35:19 [info     ] list_schemas_request           request_id=9afe70921acf4c9cb63d27aaf9cea96d
+2026-05-18 13:35:19 [info     ] api.request                    client_ip=127.0.0.1 event_id=9634b873-e5d8-432d-8658-211b76049b35 message='GET /api/v1/schemas -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/schemas', 'http_status': 200, 'query_params': None} outcome=success request_id=9afe70921acf4c9cb63d27aaf9cea96d
+2026-05-18 13:35:19 [info     ] request_completed              duration_ms=2.69 method=GET path=/api/v1/schemas request_id=9afe70921acf4c9cb63d27aaf9cea96d status_code=200
+INFO:     127.0.0.1:64164 - "GET /api/v1/schemas HTTP/1.1" 200 OK
+2026-05-18 13:35:59 [info     ] document_upload_request        file_size=114738 filename=Invoice_VF0019.pdf request_id=04692c785095477cb7f7ba6bf3d21eb6 schema_name=cms1500
+2026-05-18 13:35:59 [error    ] document_upload_queue_error    error="process_document_task() got an unexpected keyword argument 'extraction_mode'" request_id=04692c785095477cb7f7ba6bf3d21eb6
+2026-05-18 13:35:59 [error    ] api.error                      client_ip=127.0.0.1 event_id=d1cc3d22-ecb5-4616-bdc7-55da093edef2 message='POST /api/v1/documents/upload -> 500' metadata={'http_method': 'POST', 'http_path': '/api/v1/documents/upload', 'http_status': 500, 'query_params': None} outcome=failure request_id=04692c785095477cb7f7ba6bf3d21eb6
+2026-05-18 13:35:59 [info     ] request_completed              duration_ms=21.73 method=POST path=/api/v1/documents/upload request_id=04692c785095477cb7f7ba6bf3d21eb6 status_code=500
+INFO:     127.0.0.1:59134 - "POST /api/v1/documents/upload HTTP/1.1" 500 Internal Server Error
+2026-05-18 13:36:00 [info     ] document_upload_request        file_size=114738 filename=Invoice_VF0019.pdf request_id=4c8631bbc00e444aa0a3bd2f269cdc92 schema_name=cms1500
+2026-05-18 13:36:00 [error    ] document_upload_queue_error    error="process_document_task() got an unexpected keyword argument 'extraction_mode'" request_id=4c8631bbc00e444aa0a3bd2f269cdc92
+2026-05-18 13:36:00 [error    ] api.error                      client_ip=127.0.0.1 event_id=c3f37fbd-552e-4159-b978-99e337df2119 message='POST /api/v1/documents/upload -> 500' metadata={'http_method': 'POST', 'http_path': '/api/v1/documents/upload', 'http_status': 500, 'query_params': None} outcome=failure request_id=4c8631bbc00e444aa0a3bd2f269cdc92
+2026-05-18 13:36:00 [info     ] request_completed              duration_ms=4.42 method=POST path=/api/v1/documents/upload request_id=4c8631bbc00e444aa0a3bd2f269cdc92 status_code=500
+INFO:     127.0.0.1:59134 - "POST /api/v1/documents/upload HTTP/1.1" 500 Internal Server Error
+2026-05-18 13:49:13 [info     ] list_schemas_request           request_id=d38ff2202fca41dfad2f3458117c0150
+2026-05-18 13:49:13 [info     ] api.request                    client_ip=127.0.0.1 event_id=0fb99a93-62f3-4fb0-a5ba-27facb1e3928 message='GET /api/v1/schemas -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/schemas', 'http_status': 200, 'query_params': None} outcome=success request_id=d38ff2202fca41dfad2f3458117c0150
+2026-05-18 13:49:13 [info     ] request_completed              duration_ms=7.93 method=GET path=/api/v1/schemas request_id=d38ff2202fca41dfad2f3458117c0150 status_code=200
+INFO:     127.0.0.1:62105 - "GET /api/v1/schemas HTTP/1.1" 200 OK
+2026-05-18 13:49:41 [info     ] list_active_tasks_request      request_id=adfa0be55f6c465c92334b334bbae3fe
+2026-05-18 13:49:45 [info     ] queue_stats_request            request_id=1a64b857a2f3446cbdc7dbf6d894baa4
+2026-05-18 13:49:47 [info     ] queue_workers_request          request_id=215e7fd8aab64c9782259966941998ce
+2026-05-18 13:49:52 [info     ] api.request                    client_ip=127.0.0.1 event_id=4f9906b1-3ac1-473f-a019-afe4a5bb6e25 message='GET /api/v1/tasks/active -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/tasks/active', 'http_status': 200, 'query_params': None} outcome=success request_id=a7f9a6a1a8f94bfeb62b8c049a8b89f4
+2026-05-18 13:49:52 [info     ] api.request                    client_ip=127.0.0.1 event_id=0c7c54fd-d43f-4c48-b3ae-1855c26e77d3 message='GET /api/v1/queue/stats -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/queue/stats', 'http_status': 200, 'query_params': None} outcome=success
+2026-05-18 13:49:52 [info     ] api.request                    client_ip=127.0.0.1 event_id=c0d22039-d2cf-4d75-9180-77e7d38f0b9f message='GET /api/v1/queue/workers -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/queue/workers', 'http_status': 200, 'query_params': None} outcome=success request_id=7c7f6107b4ca478aaf19386911d1f0ca
+2026-05-18 13:49:52 [info     ] dashboard_activity_request     limit=10 request_id=7c7f6107b4ca478aaf19386911d1f0ca
+2026-05-18 13:49:52 [info     ] dashboard_metrics_request      request_id=b43e4f436ccb44d6b7b612cde5215a98
+2026-05-18 13:49:52 [info     ] request_completed              duration_ms=11222.47 method=GET path=/api/v1/tasks/active request_id=adfa0be55f6c465c92334b334bbae3fe status_code=200
+INFO:     127.0.0.1:55441 - "GET /api/v1/tasks/active HTTP/1.1" 200 OK
+2026-05-18 13:49:52 [info     ] request_completed              duration_ms=11222.95 method=GET path=/api/v1/queue/stats request_id=1a64b857a2f3446cbdc7dbf6d894baa4 status_code=200
+INFO:     127.0.0.1:61405 - "GET /api/v1/queue/stats HTTP/1.1" 200 OK
+2026-05-18 13:49:52 [info     ] request_completed              duration_ms=11223.31 method=GET path=/api/v1/queue/workers request_id=215e7fd8aab64c9782259966941998ce status_code=200
+INFO:     127.0.0.1:60858 - "GET /api/v1/queue/workers HTTP/1.1" 200 OK
+2026-05-18 13:49:52 [warning  ] api.error                      client_ip=127.0.0.1 event_id=bbe438f7-915d-4254-b25e-04e006756a98 message='GET /api/v1/health/detailed -> 403' metadata={'http_method': 'GET', 'http_path': '/api/v1/health/detailed', 'http_status': 403, 'query_params': None} outcome=failure request_id=b43e4f436ccb44d6b7b612cde5215a98
+2026-05-18 13:49:52 [info     ] api.request                    client_ip=127.0.0.1 event_id=bcfe84cf-9ffb-4d79-abc6-ffe4370bf186 message='GET /api/v1/dashboard/activity -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/activity', 'http_status': 200, 'query_params': 'limit=10'} outcome=success
+2026-05-18 13:49:52 [info     ] api.request                    client_ip=127.0.0.1 event_id=2f4ae350-3181-415e-b1cc-68fef73634dc message='GET /api/v1/dashboard/metrics -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/metrics', 'http_status': 200, 'query_params': None} outcome=success
+2026-05-18 13:49:52 [info     ] request_completed              duration_ms=12.73 method=GET path=/api/v1/health/detailed request_id=a7f9a6a1a8f94bfeb62b8c049a8b89f4 status_code=403
+INFO:     127.0.0.1:59669 - "GET /api/v1/health/detailed HTTP/1.1" 403 Forbidden
+2026-05-18 13:49:52 [info     ] request_completed              duration_ms=12.96 method=GET path=/api/v1/dashboard/activity request_id=7c7f6107b4ca478aaf19386911d1f0ca status_code=200
+INFO:     127.0.0.1:61427 - "GET /api/v1/dashboard/activity?limit=10 HTTP/1.1" 200 OK
+2026-05-18 13:49:52 [info     ] request_completed              duration_ms=13.29 method=GET path=/api/v1/dashboard/metrics request_id=b43e4f436ccb44d6b7b612cde5215a98 status_code=200
+INFO:     127.0.0.1:50613 - "GET /api/v1/dashboard/metrics HTTP/1.1" 200 OK
+2026-05-18 13:49:52 [info     ] list_active_tasks_request      request_id=465f6e626fa8498c9ac4dfb21d718b8d
+2026-05-18 13:49:56 [info     ] api.request                    client_ip=127.0.0.1 event_id=d343c4de-0944-4ef9-8221-d9e9d108efde message='GET /api/v1/tasks/active -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/tasks/active', 'http_status': 200, 'query_params': None} outcome=success request_id=8c143d3ea1ac40fc814c1f219cae9984
+2026-05-18 13:49:56 [warning  ] api.error                      client_ip=127.0.0.1 event_id=83ed2e3d-8272-4067-8507-5ddf02c5771c message='GET /api/v1/health/detailed -> 403' metadata={'http_method': 'GET', 'http_path': '/api/v1/health/detailed', 'http_status': 403, 'query_params': None} outcome=failure request_id=4340d3ad390e4dbeac06e6e667518b79
+2026-05-18 13:49:56 [info     ] request_completed              duration_ms=4197.24 method=GET path=/api/v1/tasks/active request_id=465f6e626fa8498c9ac4dfb21d718b8d status_code=200
+INFO:     127.0.0.1:55441 - "GET /api/v1/tasks/active HTTP/1.1" 200 OK
+2026-05-18 13:49:56 [info     ] api.request                    client_ip=127.0.0.1 event_id=2fa029d3-917b-4501-a601-658c813ffdcd message='GET /api/v1/health -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/health', 'http_status': 200, 'query_params': None} outcome=success
+2026-05-18 13:49:56 [info     ] request_completed              duration_ms=4195.48 method=GET path=/api/v1/health/detailed request_id=8c143d3ea1ac40fc814c1f219cae9984 status_code=403
+INFO:     127.0.0.1:60858 - "GET /api/v1/health/detailed HTTP/1.1" 403 Forbidden
+2026-05-18 13:49:56 [info     ] request_completed              duration_ms=4.46 method=GET path=/api/v1/health request_id=4340d3ad390e4dbeac06e6e667518b79 status_code=200
+INFO:     127.0.0.1:61427 - "GET /api/v1/health HTTP/1.1" 200 OK
+2026-05-18 13:49:56 [info     ] api.request                    client_ip=127.0.0.1 event_id=7c8288e1-46e0-4bcd-9543-3820ccdae4df message='GET /api/v1/health -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/health', 'http_status': 200, 'query_params': None} outcome=success request_id=d8ce01271b9e435d94cc6682d36837e9
+2026-05-18 13:49:56 [info     ] request_completed              duration_ms=1.09 method=GET path=/api/v1/health request_id=d8ce01271b9e435d94cc6682d36837e9 status_code=200
+INFO:     127.0.0.1:61427 - "GET /api/v1/health HTTP/1.1" 200 OK
+2026-05-18 13:50:04 [info     ] list_active_tasks_request      request_id=2c8bf914a48640b298572b0bbb2c1607
+2026-05-18 13:50:08 [info     ] api.request                    client_ip=127.0.0.1 event_id=a94c37d6-c8ea-41a3-b5c4-ce17be6b4db1 message='GET /api/v1/tasks/active -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/tasks/active', 'http_status': 200, 'query_params': None} outcome=success request_id=f181881bdadf48fbb883277f4035f37e
+2026-05-18 13:50:08 [info     ] queue_stats_request            request_id=f181881bdadf48fbb883277f4035f37e
+2026-05-18 13:50:10 [info     ] request_completed              duration_ms=6155.45 method=GET path=/api/v1/tasks/active request_id=2c8bf914a48640b298572b0bbb2c1607 status_code=200
+INFO:     127.0.0.1:61427 - "GET /api/v1/tasks/active HTTP/1.1" 200 OK
+2026-05-18 13:50:10 [info     ] api.request                    client_ip=127.0.0.1 event_id=2e85948c-ffe4-4832-884b-1c1d54925500 message='GET /api/v1/queue/stats -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/queue/stats', 'http_status': 200, 'query_params': None} outcome=success request_id=d33daa252afb45dbac6442f4332f5cf9
+2026-05-18 13:50:10 [info     ] dashboard_activity_request     limit=10 request_id=d33daa252afb45dbac6442f4332f5cf9
+2026-05-18 13:50:10 [info     ] request_completed              duration_ms=2016.98 method=GET path=/api/v1/queue/stats request_id=f181881bdadf48fbb883277f4035f37e status_code=200
+INFO:     127.0.0.1:60858 - "GET /api/v1/queue/stats HTTP/1.1" 200 OK
+2026-05-18 13:50:10 [info     ] api.request                    client_ip=127.0.0.1 event_id=ea200849-fd83-4352-ab98-c8020e4373c1 message='GET /api/v1/dashboard/activity -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/activity', 'http_status': 200, 'query_params': 'limit=10'} outcome=success
+2026-05-18 13:50:10 [info     ] request_completed              duration_ms=3.85 method=GET path=/api/v1/dashboard/activity request_id=d33daa252afb45dbac6442f4332f5cf9 status_code=200
+INFO:     127.0.0.1:65442 - "GET /api/v1/dashboard/activity?limit=10 HTTP/1.1" 200 OK
+2026-05-18 13:52:08 [info     ] list_active_tasks_request      request_id=1f1ff084a4d24f77b310afe9330e5e38
+2026-05-18 13:52:12 [info     ] api.request                    client_ip=127.0.0.1 event_id=3ae3a5ae-9f89-44c3-8d9a-706059f16255 message='GET /api/v1/tasks/active -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/tasks/active', 'http_status': 200, 'query_params': None} outcome=success request_id=fa989b093faa4ad0bdf2f8dc7a7bdf81
+2026-05-18 13:52:12 [info     ] dashboard_activity_request     limit=10 request_id=fa989b093faa4ad0bdf2f8dc7a7bdf81
+2026-05-18 13:52:12 [info     ] queue_stats_request            request_id=9ce765b6e482419d9a45b86b1f0f28cb
+2026-05-18 13:52:14 [info     ] request_completed              duration_ms=6056.62 method=GET path=/api/v1/tasks/active request_id=1f1ff084a4d24f77b310afe9330e5e38 status_code=200
+INFO:     127.0.0.1:54060 - "GET /api/v1/tasks/active HTTP/1.1" 200 OK
+2026-05-18 13:52:14 [info     ] api.request                    client_ip=127.0.0.1 event_id=fe5f1096-9d2e-4aef-a07a-82babaa414db message='GET /api/v1/dashboard/activity -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/activity', 'http_status': 200, 'query_params': 'limit=10'} outcome=success request_id=9ce765b6e482419d9a45b86b1f0f28cb
+2026-05-18 13:52:14 [info     ] api.request                    client_ip=127.0.0.1 event_id=ec46cd4b-4295-4159-bd4b-d80992245f3d message='GET /api/v1/queue/stats -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/queue/stats', 'http_status': 200, 'query_params': None} outcome=success request_id=b96cce9807964ffe9e5d099939b75d4d
+2026-05-18 13:52:14 [info     ] list_active_tasks_request      request_id=b96cce9807964ffe9e5d099939b75d4d
+2026-05-18 13:52:18 [info     ] dashboard_metrics_request      request_id=75827f109af04d4187f884c56d3c01ae
+2026-05-18 13:52:18 [info     ] dashboard_activity_request     limit=10 request_id=ae36387117fb44d091c72724e9644538
+2026-05-18 13:52:18 [info     ] request_completed              duration_ms=6134.95 method=GET path=/api/v1/dashboard/activity request_id=fa989b093faa4ad0bdf2f8dc7a7bdf81 status_code=200
+2026-05-18 13:52:18 [info     ] queue_stats_request            request_id=c4e2148384534b9188de564ae254bcdf
+2026-05-18 13:52:20 [info     ] request_completed              duration_ms=8147.25 method=GET path=/api/v1/queue/stats request_id=9ce765b6e482419d9a45b86b1f0f28cb status_code=200
+2026-05-18 13:52:20 [info     ] api.request                    client_ip=127.0.0.1 event_id=0ddf4c51-d4a6-4a49-9b22-22a2030820f4 message='GET /api/v1/tasks/active -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/tasks/active', 'http_status': 200, 'query_params': None} outcome=success request_id=5bce1560c8b546af9d9f3843d249c2a4
+2026-05-18 13:52:20 [info     ] api.request                    client_ip=127.0.0.1 event_id=3e7ef3ae-7d71-43ce-9d69-e96e686f51dd message='GET /api/v1/dashboard/metrics -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/metrics', 'http_status': 200, 'query_params': None} outcome=success
+2026-05-18 13:52:20 [info     ] api.request                    client_ip=127.0.0.1 event_id=b2647d1a-60bd-436c-a30d-613b939f4822 message='GET /api/v1/dashboard/activity -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/dashboard/activity', 'http_status': 200, 'query_params': 'limit=10'} outcome=success
+2026-05-18 13:52:20 [info     ] api.request                    client_ip=127.0.0.1 event_id=9c50bff1-eb31-40eb-9626-a7b383ee35b2 message='GET /api/v1/queue/stats -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/queue/stats', 'http_status': 200, 'query_params': None} outcome=success
+2026-05-18 13:52:20 [warning  ] api.error                      client_ip=127.0.0.1 event_id=39312b4c-2aec-4ea8-9818-9bbf523f98a0 message='GET /api/v1/health/detailed -> 403' metadata={'http_method': 'GET', 'http_path': '/api/v1/health/detailed', 'http_status': 403, 'query_params': None} outcome=failure
+2026-05-18 13:52:20 [info     ] request_completed              duration_ms=6131.56 method=GET path=/api/v1/tasks/active request_id=b96cce9807964ffe9e5d099939b75d4d status_code=200
+INFO:     127.0.0.1:58850 - "GET /api/v1/tasks/active HTTP/1.1" 200 OK
+2026-05-18 13:52:20 [info     ] request_completed              duration_ms=6130.84 method=GET path=/api/v1/dashboard/metrics request_id=75827f109af04d4187f884c56d3c01ae status_code=200
+INFO:     127.0.0.1:54559 - "GET /api/v1/dashboard/metrics HTTP/1.1" 200 OK
+2026-05-18 13:52:20 [info     ] request_completed              duration_ms=6130.95 method=GET path=/api/v1/dashboard/activity request_id=ae36387117fb44d091c72724e9644538 status_code=200
+INFO:     127.0.0.1:54004 - "GET /api/v1/dashboard/activity?limit=10 HTTP/1.1" 200 OK
+2026-05-18 13:52:20 [info     ] request_completed              duration_ms=6130.57 method=GET path=/api/v1/queue/stats request_id=c4e2148384534b9188de564ae254bcdf status_code=200
+INFO:     127.0.0.1:60857 - "GET /api/v1/queue/stats HTTP/1.1" 200 OK
+2026-05-18 13:52:20 [info     ] request_completed              duration_ms=6130.23 method=GET path=/api/v1/health/detailed request_id=5bce1560c8b546af9d9f3843d249c2a4 status_code=403
+INFO:     127.0.0.1:51683 - "GET /api/v1/health/detailed HTTP/1.1" 403 Forbidden
+2026-05-18 13:52:20 [info     ] api.request                    client_ip=127.0.0.1 event_id=f4fd1051-4078-4c92-a09e-85da3121c2da message='GET /api/v1/health -> 200' metadata={'http_method': 'GET', 'http_path': '/api/v1/health', 'http_status': 200, 'query_params': None} outcome=success request_id=ba48d1b39de5493c9ba133ee94a8e9e1
+2026-05-18 13:52:20 [info     ] request_completed              duration_ms=1.56 method=GET path=/api/v1/health request_id=ba48d1b39de5493c9ba133ee94a8e9e1 status_code=200
+INFO:     127.0.0.1:51683 - "GET /api/v1/health HTTP/1.1" 200 OK

@@ -1,0 +1,190 @@
+Requirement already satisfied: pip in ./.venv/lib/python3.12/site-packages (26.1.1)
+Requirement already satisfied: setuptools in ./.venv/lib/python3.12/site-packages (81.0.0)
+Collecting setuptools
+  Using cached setuptools-82.0.1-py3-none-any.whl.metadata (6.5 kB)
+Requirement already satisfied: wheel in ./.venv/lib/python3.12/site-packages (0.47.0)
+Requirement already satisfied: packaging>=24.0 in ./.venv/lib/python3.12/site-packages (from wheel) (26.2)
+Using cached setuptools-82.0.1-py3-none-any.whl (1.0 MB)
+Installing collected packages: setuptools
+  Attempting uninstall: setuptools
+    Found existing installation: setuptools 81.0.0
+    Uninstalling setuptools-81.0.0:
+      Successfully uninstalled setuptools-81.0.0
+Successfully installed setuptools-82.0.1
+Obtaining file:///mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: doc-extraction-system
+  Building editable for doc-extraction-system (pyproject.toml): started
+  Building editable for doc-extraction-system (pyproject.toml): finished with status 'done'
+  Created wheel for doc-extraction-system: filename=doc_extraction_system-2.0.0-0.editable-py3-none-any.whl size=14534 sha256=6e5987492854ee075b5b97b0704bdae3a7b5aecd429adc2606e108da5f1206a7
+  Stored in directory: /tmp/pip-ephem-wheel-cache-u316fbvk/wheels/23/ec/92/6b314fc1e2469a33dd87444f36d26a360728e22a15ab7c38f7
+Successfully built doc-extraction-system
+Installing collected packages: doc-extraction-system
+Successfully installed doc-extraction-system-2.0.0
+Requirement already satisfied: fastapi>=0.115.0 in ./.venv/lib/python3.12/site-packages (0.136.1)
+Requirement already satisfied: uvicorn>=0.32.0 in ./.venv/lib/python3.12/site-packages (from uvicorn[standard]>=0.32.0) (0.47.0)
+Requirement already satisfied: python-multipart>=0.0.17 in ./.venv/lib/python3.12/site-packages (0.0.29)
+Requirement already satisfied: starlette>=0.41.0 in ./.venv/lib/python3.12/site-packages (1.0.0)
+Requirement already satisfied: pydantic>=2.10.0 in ./.venv/lib/python3.12/site-packages (2.13.4)
+Requirement already satisfied: pydantic-settings>=2.6.0 in ./.venv/lib/python3.12/site-packages (2.14.1)
+Collecting langchain>=1.0.0
+  Using cached langchain-1.3.1-py3-none-any.whl.metadata (5.8 kB)
+Collecting langchain-core>=0.3.25
+  Using cached langchain_core-1.4.0-py3-none-any.whl.metadata (4.5 kB)
+Collecting langchain-community>=0.3.12
+  Using cached langchain_community-0.4.1-py3-none-any.whl.metadata (3.0 kB)
+Collecting langchain-openai>=0.2.14
+  Using cached langchain_openai-1.2.1-py3-none-any.whl.metadata (3.1 kB)
+Collecting langgraph>=0.2.60
+  Using cached langgraph-1.2.0-py3-none-any.whl.metadata (8.0 kB)
+Collecting langgraph-checkpoint>=2.0.10
+  Using cached langgraph_checkpoint-4.1.0-py3-none-any.whl.metadata (5.2 kB)
+Collecting langgraph-checkpoint-sqlite>=2.0.0
+  Using cached langgraph_checkpoint_sqlite-3.1.0-py3-none-any.whl.metadata (3.2 kB)
+Requirement already satisfied: langsmith>=0.1.0 in ./.venv/lib/python3.12/site-packages (0.8.5)
+Requirement already satisfied: openai>=1.55.0 in ./.venv/lib/python3.12/site-packages (2.37.0)
+Requirement already satisfied: tenacity>=9.0.0 in ./.venv/lib/python3.12/site-packages (9.1.4)
+Requirement already satisfied: httpx>=0.27.0 in ./.venv/lib/python3.12/site-packages (0.28.1)
+Requirement already satisfied: aiohttp>=3.11.0 in ./.venv/lib/python3.12/site-packages (3.13.5)
+Requirement already satisfied: PyMuPDF>=1.25.0 in ./.venv/lib/python3.12/site-packages (1.27.2.3)
+Requirement already satisfied: Pillow>=11.0.0 in ./.venv/lib/python3.12/site-packages (12.2.0)
+Requirement already satisfied: opencv-python>=4.10.0 in ./.venv/lib/python3.12/site-packages (4.13.0.92)
+Requirement already satisfied: numpy>=1.26.0 in ./.venv/lib/python3.12/site-packages (2.4.5)
+Requirement already satisfied: scikit-learn>=1.4.0 in ./.venv/lib/python3.12/site-packages (1.8.0)
+Requirement already satisfied: python-docx>=1.1.0 in ./.venv/lib/python3.12/site-packages (1.2.0)
+Requirement already satisfied: pydicom>=2.4.0 in ./.venv/lib/python3.12/site-packages (3.0.2)
+Requirement already satisfied: celery>=5.4.0 in ./.venv/lib/python3.12/site-packages (5.6.3)
+Requirement already satisfied: kombu>=5.4.0 in ./.venv/lib/python3.12/site-packages (5.6.2)
+Requirement already satisfied: redis>=5.2.0 in ./.venv/lib/python3.12/site-packages (7.4.0)
+Requirement already satisfied: cryptography>=43.0.0 in ./.venv/lib/python3.12/site-packages (48.0.0)
+Requirement already satisfied: python-jose>=3.3.0 in ./.venv/lib/python3.12/site-packages (from python-jose[cryptography]>=3.3.0) (3.5.0)
+Requirement already satisfied: passlib>=1.7.4 in ./.venv/lib/python3.12/site-packages (from passlib[bcrypt]>=1.7.4) (1.7.4)
+Requirement already satisfied: bcrypt>=4.2.0 in ./.venv/lib/python3.12/site-packages (5.0.0)
+Requirement already satisfied: openpyxl>=3.1.5 in ./.venv/lib/python3.12/site-packages (3.1.5)
+Requirement already satisfied: pandas>=2.2.0 in ./.venv/lib/python3.12/site-packages (3.0.3)
+Requirement already satisfied: xlsxwriter>=3.2.0 in ./.venv/lib/python3.12/site-packages (3.2.9)
+Requirement already satisfied: prometheus-client>=0.21.0 in ./.venv/lib/python3.12/site-packages (0.25.0)
+Requirement already satisfied: structlog>=24.4.0 in ./.venv/lib/python3.12/site-packages (25.5.0)
+Requirement already satisfied: python-json-logger>=2.0.7 in ./.venv/lib/python3.12/site-packages (4.1.0)
+Requirement already satisfied: python-dotenv>=1.0.1 in ./.venv/lib/python3.12/site-packages (1.2.2)
+Requirement already satisfied: pyyaml>=6.0.0 in ./.venv/lib/python3.12/site-packages (6.0.3)
+Requirement already satisfied: typing-extensions>=4.8.0 in ./.venv/lib/python3.12/site-packages (from fastapi>=0.115.0) (4.15.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.12/site-packages (from fastapi>=0.115.0) (0.4.2)
+Requirement already satisfied: annotated-doc>=0.0.2 in ./.venv/lib/python3.12/site-packages (from fastapi>=0.115.0) (0.0.4)
+Requirement already satisfied: click>=7.0 in ./.venv/lib/python3.12/site-packages (from uvicorn>=0.32.0->uvicorn[standard]>=0.32.0) (8.4.0)
+Requirement already satisfied: h11>=0.8 in ./.venv/lib/python3.12/site-packages (from uvicorn>=0.32.0->uvicorn[standard]>=0.32.0) (0.16.0)
+Requirement already satisfied: anyio<5,>=3.6.2 in ./.venv/lib/python3.12/site-packages (from starlette>=0.41.0) (4.13.0)
+Requirement already satisfied: idna>=2.8 in ./.venv/lib/python3.12/site-packages (from anyio<5,>=3.6.2->starlette>=0.41.0) (3.15)
+Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.12/site-packages (from pydantic>=2.10.0) (0.7.0)
+Requirement already satisfied: pydantic-core==2.46.4 in ./.venv/lib/python3.12/site-packages (from pydantic>=2.10.0) (2.46.4)
+Requirement already satisfied: jsonpatch<2.0.0,>=1.33.0 in ./.venv/lib/python3.12/site-packages (from langchain-core>=0.3.25) (1.33)
+Requirement already satisfied: langchain-protocol>=0.0.14 in ./.venv/lib/python3.12/site-packages (from langchain-core>=0.3.25) (0.0.15)
+Requirement already satisfied: packaging>=23.2.0 in ./.venv/lib/python3.12/site-packages (from langchain-core>=0.3.25) (26.2)
+Requirement already satisfied: uuid-utils<1.0,>=0.12.0 in ./.venv/lib/python3.12/site-packages (from langchain-core>=0.3.25) (0.15.0)
+Collecting langgraph-prebuilt<1.2.0,>=1.1.0 (from langgraph>=0.2.60)
+  Using cached langgraph_prebuilt-1.1.0-py3-none-any.whl.metadata (5.2 kB)
+Requirement already satisfied: langgraph-sdk<0.4.0,>=0.3.0 in ./.venv/lib/python3.12/site-packages (from langgraph>=0.2.60) (0.3.14)
+Requirement already satisfied: xxhash>=3.5.0 in ./.venv/lib/python3.12/site-packages (from langgraph>=0.2.60) (3.7.0)
+Requirement already satisfied: ormsgpack>=1.12.0 in ./.venv/lib/python3.12/site-packages (from langgraph-checkpoint>=2.0.10) (1.12.2)
+Requirement already satisfied: orjson>=3.9.14 in ./.venv/lib/python3.12/site-packages (from langsmith>=0.1.0) (3.11.9)
+Requirement already satisfied: requests-toolbelt>=1.0.0 in ./.venv/lib/python3.12/site-packages (from langsmith>=0.1.0) (1.0.0)
+Requirement already satisfied: requests>=2.0.0 in ./.venv/lib/python3.12/site-packages (from langsmith>=0.1.0) (2.34.2)
+Requirement already satisfied: zstandard>=0.23.0 in ./.venv/lib/python3.12/site-packages (from langsmith>=0.1.0) (0.25.0)
+Requirement already satisfied: certifi in ./.venv/lib/python3.12/site-packages (from httpx>=0.27.0) (2026.4.22)
+Requirement already satisfied: httpcore==1.* in ./.venv/lib/python3.12/site-packages (from httpx>=0.27.0) (1.0.9)
+Requirement already satisfied: jsonpointer>=1.9 in ./.venv/lib/python3.12/site-packages (from jsonpatch<2.0.0,>=1.33.0->langchain-core>=0.3.25) (3.1.1)
+Collecting langchain-classic<2.0.0,>=1.0.0 (from langchain-community>=0.3.12)
+  Using cached langchain_classic-1.0.7-py3-none-any.whl.metadata (5.1 kB)
+Requirement already satisfied: SQLAlchemy<3.0.0,>=1.4.0 in ./.venv/lib/python3.12/site-packages (from langchain-community>=0.3.12) (2.0.49)
+Requirement already satisfied: dataclasses-json<0.7.0,>=0.6.7 in ./.venv/lib/python3.12/site-packages (from langchain-community>=0.3.12) (0.6.7)
+Requirement already satisfied: httpx-sse<1.0.0,>=0.4.0 in ./.venv/lib/python3.12/site-packages (from langchain-community>=0.3.12) (0.4.3)
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in ./.venv/lib/python3.12/site-packages (from aiohttp>=3.11.0) (2.6.1)
+Requirement already satisfied: aiosignal>=1.4.0 in ./.venv/lib/python3.12/site-packages (from aiohttp>=3.11.0) (1.4.0)
+Requirement already satisfied: attrs>=17.3.0 in ./.venv/lib/python3.12/site-packages (from aiohttp>=3.11.0) (26.1.0)
+Requirement already satisfied: frozenlist>=1.1.1 in ./.venv/lib/python3.12/site-packages (from aiohttp>=3.11.0) (1.8.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in ./.venv/lib/python3.12/site-packages (from aiohttp>=3.11.0) (6.7.1)
+Requirement already satisfied: propcache>=0.2.0 in ./.venv/lib/python3.12/site-packages (from aiohttp>=3.11.0) (0.5.2)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in ./.venv/lib/python3.12/site-packages (from aiohttp>=3.11.0) (1.23.0)
+Requirement already satisfied: marshmallow<4.0.0,>=3.18.0 in ./.venv/lib/python3.12/site-packages (from dataclasses-json<0.7.0,>=0.6.7->langchain-community>=0.3.12) (3.26.2)
+Requirement already satisfied: typing-inspect<1,>=0.4.0 in ./.venv/lib/python3.12/site-packages (from dataclasses-json<0.7.0,>=0.6.7->langchain-community>=0.3.12) (0.9.0)
+Collecting langchain-text-splitters<2.0.0,>=1.1.2 (from langchain-classic<2.0.0,>=1.0.0->langchain-community>=0.3.12)
+  Using cached langchain_text_splitters-1.1.2-py3-none-any.whl.metadata (3.3 kB)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./.venv/lib/python3.12/site-packages (from requests>=2.0.0->langsmith>=0.1.0) (3.4.7)
+Requirement already satisfied: urllib3<3,>=1.26 in ./.venv/lib/python3.12/site-packages (from requests>=2.0.0->langsmith>=0.1.0) (2.7.0)
+Requirement already satisfied: greenlet>=1 in ./.venv/lib/python3.12/site-packages (from SQLAlchemy<3.0.0,>=1.4.0->langchain-community>=0.3.12) (3.5.0)
+Requirement already satisfied: mypy-extensions>=0.3.0 in ./.venv/lib/python3.12/site-packages (from typing-inspect<1,>=0.4.0->dataclasses-json<0.7.0,>=0.6.7->langchain-community>=0.3.12) (1.1.0)
+Requirement already satisfied: tiktoken<1.0.0,>=0.7.0 in ./.venv/lib/python3.12/site-packages (from langchain-openai>=0.2.14) (0.13.0)
+Requirement already satisfied: distro<2,>=1.7.0 in ./.venv/lib/python3.12/site-packages (from openai>=1.55.0) (1.9.0)
+Requirement already satisfied: jiter<1,>=0.10.0 in ./.venv/lib/python3.12/site-packages (from openai>=1.55.0) (0.14.0)
+Requirement already satisfied: sniffio in ./.venv/lib/python3.12/site-packages (from openai>=1.55.0) (1.3.1)
+Requirement already satisfied: tqdm>4 in ./.venv/lib/python3.12/site-packages (from openai>=1.55.0) (4.67.3)
+Requirement already satisfied: regex in ./.venv/lib/python3.12/site-packages (from tiktoken<1.0.0,>=0.7.0->langchain-openai>=0.2.14) (2026.5.9)
+Requirement already satisfied: aiosqlite>=0.20 in ./.venv/lib/python3.12/site-packages (from langgraph-checkpoint-sqlite>=2.0.0) (0.22.1)
+Requirement already satisfied: sqlite-vec>=0.1.6 in ./.venv/lib/python3.12/site-packages (from langgraph-checkpoint-sqlite>=2.0.0) (0.1.9)
+Requirement already satisfied: scipy>=1.10.0 in ./.venv/lib/python3.12/site-packages (from scikit-learn>=1.4.0) (1.17.1)
+Requirement already satisfied: joblib>=1.3.0 in ./.venv/lib/python3.12/site-packages (from scikit-learn>=1.4.0) (1.5.3)
+Requirement already satisfied: threadpoolctl>=3.2.0 in ./.venv/lib/python3.12/site-packages (from scikit-learn>=1.4.0) (3.6.0)
+Requirement already satisfied: lxml>=3.1.0 in ./.venv/lib/python3.12/site-packages (from python-docx>=1.1.0) (6.1.0)
+Requirement already satisfied: billiard<5.0,>=4.2.1 in ./.venv/lib/python3.12/site-packages (from celery>=5.4.0) (4.2.4)
+Requirement already satisfied: vine<6.0,>=5.1.0 in ./.venv/lib/python3.12/site-packages (from celery>=5.4.0) (5.1.0)
+Requirement already satisfied: click-didyoumean>=0.3.0 in ./.venv/lib/python3.12/site-packages (from celery>=5.4.0) (0.3.1)
+Requirement already satisfied: click-repl>=0.2.0 in ./.venv/lib/python3.12/site-packages (from celery>=5.4.0) (0.3.0)
+Requirement already satisfied: click-plugins>=1.1.1 in ./.venv/lib/python3.12/site-packages (from celery>=5.4.0) (1.1.1.2)
+Requirement already satisfied: python-dateutil>=2.8.2 in ./.venv/lib/python3.12/site-packages (from celery>=5.4.0) (2.9.0.post0)
+Requirement already satisfied: tzlocal in ./.venv/lib/python3.12/site-packages (from celery>=5.4.0) (5.3.1)
+Requirement already satisfied: amqp<6.0.0,>=5.1.1 in ./.venv/lib/python3.12/site-packages (from kombu>=5.4.0) (5.3.1)
+Requirement already satisfied: tzdata>=2025.2 in ./.venv/lib/python3.12/site-packages (from kombu>=5.4.0) (2026.2)
+Requirement already satisfied: cffi>=2.0.0 in ./.venv/lib/python3.12/site-packages (from cryptography>=43.0.0) (2.0.0)
+Requirement already satisfied: ecdsa!=0.15 in ./.venv/lib/python3.12/site-packages (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0) (0.19.2)
+Requirement already satisfied: rsa!=4.1.1,!=4.4,<5.0,>=4.0 in ./.venv/lib/python3.12/site-packages (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0) (4.9.1)
+Requirement already satisfied: pyasn1>=0.5.0 in ./.venv/lib/python3.12/site-packages (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0) (0.6.3)
+Requirement already satisfied: et-xmlfile in ./.venv/lib/python3.12/site-packages (from openpyxl>=3.1.5) (2.0.0)
+Requirement already satisfied: pycparser in ./.venv/lib/python3.12/site-packages (from cffi>=2.0.0->cryptography>=43.0.0) (3.0)
+Requirement already satisfied: prompt-toolkit>=3.0.36 in ./.venv/lib/python3.12/site-packages (from click-repl>=0.2.0->celery>=5.4.0) (3.0.52)
+Requirement already satisfied: six>=1.9.0 in ./.venv/lib/python3.12/site-packages (from ecdsa!=0.15->python-jose>=3.3.0->python-jose[cryptography]>=3.3.0) (1.17.0)
+Requirement already satisfied: wcwidth in ./.venv/lib/python3.12/site-packages (from prompt-toolkit>=3.0.36->click-repl>=0.2.0->celery>=5.4.0) (0.7.0)
+Requirement already satisfied: httptools>=0.6.3 in ./.venv/lib/python3.12/site-packages (from uvicorn[standard]>=0.32.0) (0.7.1)
+Requirement already satisfied: uvloop>=0.15.1 in ./.venv/lib/python3.12/site-packages (from uvicorn[standard]>=0.32.0) (0.22.1)
+Requirement already satisfied: watchfiles>=0.20 in ./.venv/lib/python3.12/site-packages (from uvicorn[standard]>=0.32.0) (1.2.0)
+Requirement already satisfied: websockets>=10.4 in ./.venv/lib/python3.12/site-packages (from uvicorn[standard]>=0.32.0) (16.0)
+Using cached langchain-1.3.1-py3-none-any.whl (114 kB)
+Using cached langchain_core-1.4.0-py3-none-any.whl (548 kB)
+Using cached langgraph-1.2.0-py3-none-any.whl (234 kB)
+Using cached langgraph_checkpoint-4.1.0-py3-none-any.whl (56 kB)
+Using cached langgraph_prebuilt-1.1.0-py3-none-any.whl (41 kB)
+Using cached langchain_community-0.4.1-py3-none-any.whl (2.5 MB)
+Using cached langchain_classic-1.0.7-py3-none-any.whl (1.0 MB)
+Using cached langchain_text_splitters-1.1.2-py3-none-any.whl (35 kB)
+Using cached langchain_openai-1.2.1-py3-none-any.whl (98 kB)
+Using cached langgraph_checkpoint_sqlite-3.1.0-py3-none-any.whl (38 kB)
+Installing collected packages: langchain-core, langgraph-checkpoint, langchain-text-splitters, langchain-openai, langgraph-prebuilt, langgraph-checkpoint-sqlite, langchain-classic, langgraph, langchain-community, langchain
+
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+doc-extraction-system 2.0.0 requires mem0ai>=0.1.29, which is not installed.
+doc-extraction-system 2.0.0 requires sentence-transformers>=3.3.0, which is not installed.
+doc-extraction-system 2.0.0 requires streamlit>=1.40.0, which is not installed.
+doc-extraction-system 2.0.0 requires streamlit-extras>=0.4.0, which is not installed.
+Successfully installed langchain-1.3.1 langchain-classic-1.0.7 langchain-community-0.4.1 langchain-core-1.4.0 langchain-openai-1.2.1 langchain-text-splitters-1.1.2 langgraph-1.2.0 langgraph-checkpoint-4.1.0 langgraph-checkpoint-sqlite-3.1.0 langgraph-prebuilt-1.1.0
+core-imports-ok
+
+[1m[94m============================================================[0m
+[1m[94m  PDF Document Extraction System[0m
+[1m[94m  Universal Multi-Record Extraction with VLM[0m
+[1m[94m============================================================[0m
+
+[13:02:23] [MAIN] [1mRunning pre-flight checks...[0m
+[92m[13:02:23] [MAIN] Python version: 3.12.3[0m
+[92m[13:02:23] [MAIN] Node.js version: v20.20.1[0m
+[92m[13:02:23] [MAIN] npm version: 10.8.2[0m
+[92m[13:02:34] [MAIN] Backend dependencies: OK[0m
+[92m[13:02:34] [MAIN] Frontend dependencies: OK[0m
+[92m[13:02:34] [MAIN] Environment file: OK[0m
+[92m[13:02:34] [MAIN] Security configuration: OK[0m
+[92m[13:02:34] [MAIN] All checks passed![0m

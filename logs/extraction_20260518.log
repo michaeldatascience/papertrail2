@@ -1,0 +1,58 @@
+2026-05-18 13:10:38 - pdf_extraction - INFO - Starting extraction: smoke_test.pdf
+2026-05-18 13:13:11 - pdf_extraction - INFO - Starting extraction: smoke_test.pdf
+2026-05-18 13:14:18 - pdf_extraction - INFO - Starting extraction: smoke_test.pdf
+2026-05-18 13:15:04 - pdf_extraction - ERROR - Extraction error
+Traceback (most recent call last):
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/main.py", line 747, in extract_pdf_cli
+    result = runner.extract_multi_record(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/pipeline/runner.py", line 851, in extract_multi_record
+    result = extractor.extract_document(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 1446, in extract_document
+    doc_metadata = self.detect_document_type(first_page_uri)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 503, in detect_document_type
+    result = self._send_vision_json(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 465, in _send_vision_json
+    raise RuntimeError(
+RuntimeError: VLM call failed after 3 attempts: Expecting property name enclosed in double quotes: line 3 column 130 (char 161)
+2026-05-18 13:15:55 - pdf_extraction - INFO - Starting extraction: smoke_test.pdf
+2026-05-18 13:16:21 - pdf_extraction - ERROR - Extraction error
+Traceback (most recent call last):
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/main.py", line 747, in extract_pdf_cli
+    result = runner.extract_multi_record(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/pipeline/runner.py", line 851, in extract_multi_record
+    result = extractor.extract_document(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 1449, in extract_document
+    doc_metadata = self.detect_document_type(first_page_uri)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 506, in detect_document_type
+    result = self._send_vision_json(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 468, in _send_vision_json
+    raise RuntimeError(
+RuntimeError: VLM call failed after 3 attempts: Error code: 400 - {'error': "'response_format.type' must be 'json_schema' or 'text'"}
+2026-05-18 13:16:36 - pdf_extraction - INFO - Starting extraction: smoke_test.pdf
+2026-05-18 13:17:05 - pdf_extraction - ERROR - Extraction error
+Traceback (most recent call last):
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/main.py", line 747, in extract_pdf_cli
+    result = runner.extract_multi_record(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/pipeline/runner.py", line 851, in extract_multi_record
+    result = extractor.extract_document(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 1458, in extract_document
+    doc_metadata = self.detect_document_type(first_page_uri)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 515, in detect_document_type
+    result = self._send_vision_json(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/CODE/ADE/Agentic-Document-Extraction-PDF-main/Agentic-Document-Extraction-PDF-main/src/extraction/multi_record.py", line 477, in _send_vision_json
+    raise RuntimeError(
+RuntimeError: VLM call failed after 3 attempts: Expecting property name enclosed in double quotes: line 3 column 130 (char 161)
+2026-05-18 13:17:18 - pdf_extraction - INFO - Starting extraction: smoke_test.pdf
+2026-05-18 13:20:14 - pdf_extraction - INFO - Results saved: smoke_test_output_single/smoke_test_results.json
