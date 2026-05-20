@@ -127,14 +127,18 @@ Important: some of these were **repairs/compatibility layers**, not necessarily 
 ### npm
 - required for frontend install and dev server
 
-### LM Studio
-Required for extraction behavior.
+### Vision Language Model (VLM) Backend
 
-Observed expected API endpoint in code:
-- `http://localhost:1234/v1`
+**Option 1: OpenRouter (Cloud - Recommended)**
+- No GPU required
+- See [`docs/OPENROUTER_SETUP.md`](./docs/OPENROUTER_SETUP.md) for setup
+- Supports GPT-4, Claude, and other models
+- Pay-per-use pricing
 
-In practice we used:
-- `http://127.0.0.1:1234`
+**Option 2: LM Studio (Local)**
+- Requires GPU and local model
+- Expected API endpoint: `http://localhost:1234/v1`
+- Free but needs significant hardware
 
 ### Redis
 Optional for queue-oriented features.
@@ -204,16 +208,18 @@ You need LM Studio running with a model loaded.
 Observed/default model references in code/config:
 - `qwen/qwen3-vl-8b`
 
-### Important LM Studio note
-From actual runtime testing, the extraction path behaves poorly if the effective context is too small.
+### Important VLM notes
 
-Recommended:
-- context window: **8192 minimum**
-- **32768 preferred** if available
+**For OpenRouter:**
+- Requires API key from https://openrouter.ai/keys
+- Recommended model: `openai/gpt-4o-mini` for cost efficiency
+- See setup guide for detailed configuration
 
-If LM Studio effectively runs at around `4096`, parts of the pipeline can fail with:
-- request/context overflow
-- malformed or truncated JSON
+**For LM Studio:**
+- Context window: **8192 minimum**, **32768 preferred**
+- If context is too small (~4096), extraction may fail with:
+  - request/context overflow
+  - malformed or truncated JSON
 
 ---
 

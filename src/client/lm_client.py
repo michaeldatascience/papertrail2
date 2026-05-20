@@ -9,6 +9,7 @@ comprehensive error handling.
 import asyncio
 import base64
 import json
+import os
 import re
 import threading
 import time
@@ -334,6 +335,10 @@ class LMStudioClient:
             re.compile(r"\{[\s\S]*\}", re.MULTILINE),
         ]
 
+        # Store normalized base URL for provider detection
+        self.base_url = self._base_url
+        self.model = self._model
+        
         logger.info(
             "lm_client_initialized",
             base_url=self._base_url,
@@ -355,9 +360,25 @@ class LMStudioClient:
             with self._client_lock:
                 # Double-check after acquiring lock
                 if not hasattr(self._thread_local, "client"):
+                    # Detect provider and set API key
+                    is_openrouter = "openrouter.ai" in self.base_url.lower()
+                    is_openai_compatible = any(provider in self.base_url.lower() 
+                        for provider in ["openai.com", "azure.com", "perplexity.ai", "anthropic.com"])
+                    
+                    # Get API key from environment if needed
+                    api_key = "not-needed"  # Default for LM Studio
+                    if is_openrouter:
+                        api_key = os.getenv("OPENROUTER_API_KEY", "")
+                        if not api_key:
+                            logger.warning("OPENROUTER_API_KEY not set")
+                    elif is_openai_compatible:
+                        api_key = os.getenv("OPENAI_API_KEY", "")
+                        if not api_key:
+                            logger.warning("OPENAI_API_KEY not set")
+                    
                     self._thread_local.client = OpenAI(
                         base_url=self._base_url,
-                        api_key="not-needed",  # LM Studio doesn't require API key
+                        api_key=api_key,
                         timeout=float(self._timeout),
                         max_retries=0,  # We handle retries ourselves
                     )
@@ -526,6 +547,11 @@ class LMStudioClient:
         extra_body: dict[str, Any] | None = None,
     ) -> Any:
         """Execute a single VLM request (called by the retryer)."""
+        # Detect provider from base URL
+        is_openrouter = "openrouter.ai" in self.base_url.lower()
+        is_openai_compatible = any(provider in self.base_url.lower() 
+            for provider in ["openai.com", "azure.com", "perplexity.ai", "anthropic.com"])
+        
         # Build messages
         messages: list[dict[str, Any]] = []
 
@@ -552,6 +578,23 @@ class LMStudioClient:
                 "text": request.prompt,
             },
         ]
+        
+        # Reorder content for OpenRouter/OpenAI (text before images)
+        if is_openrouter or is_openai_compatible:
+            message_content = user_content
+            reordered_content = []
+            
+            # First, add all text items
+            for item in message_content:
+                if item.get("type") == "text":
+                    reordered_content.append(item)
+            
+            # Then add all images
+            for item in message_content:
+                if item.get("type") == "image_url":
+                    reordered_content.append(item)
+            
+            user_content = reordered_content
 
         messages.append(
             {
@@ -563,29 +606,40 @@ class LMStudioClient:
         # Send request using thread-local client for thread safety
         client = self._get_client()
 
-        # Build API kwargs. Per-request `model` override (if provided by the
-        # caller via WS-2 model routing) takes precedence over the client default.
-        api_kwargs: dict[str, Any] = {
-            "model": model or self._model,
-            "messages": messages,
-            "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
-        }
-
-        # V3 Phase 1: optional schema enforcement at decode time. When
-        # ``response_format`` is provided (typically a
-        # ``{"type": "json_schema", "json_schema": {...}}`` shape from
-        # LMStudioBackend), LM Studio 0.3+ and vLLM 0.6+ guarantee the
-        # generated tokens conform to the schema. Malformed JSON is
-        # structurally impossible.
-        if response_format is not None:
-            api_kwargs["response_format"] = response_format
-
-        # vLLM-specific extras (e.g. ``{"guided_json": ...,
-        # "guided_decoding_backend": "xgrammar"}``) flow through here.
-        # LM Studio ignores unknown extra_body fields per OpenAI-compat.
-        if extra_body is not None:
-            api_kwargs["extra_body"] = extra_body
+        # Build API kwargs based on provider
+        actual_model = model or self._model
+        
+        if is_openrouter or is_openai_compatible:
+            # Standard OpenAI format
+            api_kwargs: dict[str, Any] = {
+                "model": actual_model,
+                "messages": messages,
+                "temperature": request.temperature,
+                "max_tokens": request.max_tokens,
+            }
+            # Add response format if provided
+            if response_format is not None:
+                # For cloud providers, simplify to json_object if using json_schema
+                if response_format.get("type") == "json_schema":
+                    api_kwargs["response_format"] = {"type": "json_object"}
+                else:
+                    api_kwargs["response_format"] = response_format
+        else:
+            # LM Studio format (original)
+            api_kwargs: dict[str, Any] = {
+                "model": actual_model,
+                "messages": messages,
+                "temperature": request.temperature,
+                "max_tokens": request.max_tokens,
+                "stream": False,
+            }
+            # V3 Phase 1: optional schema enforcement at decode time
+            if response_format is not None:
+                api_kwargs["response_format"] = response_format
+            
+            # vLLM-specific extras
+            if extra_body is not None:
+                api_kwargs["extra_body"] = extra_body
 
         response = client.chat.completions.create(**api_kwargs)
 
@@ -653,9 +707,21 @@ class LMStudioClient:
             async with self._async_client_lock:
                 # Double-check after acquiring lock
                 if self._async_client is None:
+                    # Detect provider and set API key
+                    is_openrouter = "openrouter.ai" in self.base_url.lower()
+                    is_openai_compatible = any(provider in self.base_url.lower() 
+                        for provider in ["openai.com", "azure.com", "perplexity.ai", "anthropic.com"])
+                    
+                    # Get API key from environment if needed
+                    api_key = "not-needed"  # Default for LM Studio
+                    if is_openrouter:
+                        api_key = os.getenv("OPENROUTER_API_KEY", "")
+                    elif is_openai_compatible:
+                        api_key = os.getenv("OPENAI_API_KEY", "")
+                    
                     self._async_client = AsyncOpenAI(
                         base_url=self._base_url,
-                        api_key="not-needed",
+                        api_key=api_key,
                         timeout=float(self._timeout),
                         max_retries=0,
                     )
