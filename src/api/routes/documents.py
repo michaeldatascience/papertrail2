@@ -569,7 +569,7 @@ async def upload_document(
             export_format=export_format.value,
             mask_phi=mask_phi,
             priority=priority,
-            extraction_mode=extraction_mode.value,
+
         )
 
         logger.info(

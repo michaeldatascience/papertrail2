@@ -9,6 +9,7 @@ comprehensive error handling.
 import asyncio
 import base64
 import json
+import os
 import re
 import threading
 import time
@@ -285,6 +286,13 @@ class LMStudioClient:
 
         self._base_url = base_url or str(settings.lm_studio.base_url)
         self._model = model or settings.lm_studio.model
+        self._api_key = (
+            settings.lm_studio.api_key.get_secret_value()
+            if settings.lm_studio.api_key is not None
+            else os.environ.get("OPENAI_API_KEY")
+            or os.environ.get("OPENROUTER_API_KEY")
+            or "not-needed"
+        )
         self._max_tokens = max_tokens or settings.lm_studio.max_tokens
         self._temperature = temperature or settings.lm_studio.temperature
         self._timeout = timeout or settings.lm_studio.timeout
@@ -357,7 +365,7 @@ class LMStudioClient:
                 if not hasattr(self._thread_local, "client"):
                     self._thread_local.client = OpenAI(
                         base_url=self._base_url,
-                        api_key="not-needed",  # LM Studio doesn't require API key
+                        api_key=self._api_key,
                         timeout=float(self._timeout),
                         max_retries=0,  # We handle retries ourselves
                     )
@@ -587,7 +595,27 @@ class LMStudioClient:
         if extra_body is not None:
             api_kwargs["extra_body"] = extra_body
 
-        response = client.chat.completions.create(**api_kwargs)
+        logger.debug(
+            "lm_client_request_breadcrumb",
+            request_id=request.request_id,
+            model=api_kwargs["model"],
+            has_response_format=response_format is not None,
+            extra_body_keys=sorted(extra_body.keys()) if extra_body else [],
+        )
+
+        try:
+            response = client.chat.completions.create(**api_kwargs)
+        except Exception as e:
+            logger.exception(
+                "lm_client_request_failed",
+                request_id=request.request_id,
+                model=api_kwargs["model"],
+                has_response_format=response_format is not None,
+                extra_body_keys=sorted(extra_body.keys()) if extra_body else [],
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise
 
         return response
 
@@ -655,7 +683,7 @@ class LMStudioClient:
                 if self._async_client is None:
                     self._async_client = AsyncOpenAI(
                         base_url=self._base_url,
-                        api_key="not-needed",
+                        api_key=self._api_key,
                         timeout=float(self._timeout),
                         max_retries=0,
                     )

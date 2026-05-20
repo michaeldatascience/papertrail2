@@ -169,4 +169,4 @@ class LMStudioBackend:
         return self._clients[role]
 
 
-assert isinstance(LMStudioBackend('http://localhost:1234/v1', 'qwen3-vl'), VLMBackend)
+assert isinstance(LMStudioBackend('http://localhost:1234/v1', 'Qwen-VL-4B-Instruct-Q4-K-M.gguf'), VLMBackend)

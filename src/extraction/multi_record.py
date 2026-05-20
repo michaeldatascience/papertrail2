@@ -1439,8 +1439,8 @@ CRITICAL: Read the actual text in the image. Do not guess or infer."""
             page_images = [
                 p
                 for p in page_images
-                if (start_page is None or p["page_number"] >= start_page)
-                and (end_page is None or p["page_number"] <= end_page)
+                if (start_page is None or int(p["page_number"] or 0) >= int(start_page))
+                and (end_page is None or int(p["page_number"] or 0) <= int(end_page))
             ]
 
         total_pages = len(page_images)

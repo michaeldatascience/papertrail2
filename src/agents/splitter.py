@@ -347,13 +347,13 @@ class SplitterAgent(BaseAgent):
             List of page images within the segment.
         """
         if isinstance(segment, dict):
-            start = segment["start_page"]
-            end = segment["end_page"]
+            start = int(segment["start_page"])
+            end = int(segment["end_page"])
         else:
-            start = segment.start_page
-            end = segment.end_page
+            start = int(segment.start_page)
+            end = int(segment.end_page)
 
         return [
             p for p in page_images
-            if start <= p.get("page_number", 0) <= end
+            if start <= int(p.get("page_number", 0) or 0) <= end
         ]

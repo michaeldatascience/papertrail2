@@ -5,6 +5,28 @@ This document records the issues found while bringing this repo up inside WSL un
 
 ---
 
+## 2026-05-20 current state
+
+### What is now fixed
+- `.env` settings load correctly, including nested VLM config.
+- `src.pipeline.provenance` exists again and supports the export code path.
+- The repeated `str < int` failure path was traced to page-number comparisons and hardened.
+- Constrained VLM requests now emit breadcrumb logs before call, on retry, and on failure.
+- LM Studio client can now use an OpenAI-compatible API key flow, so the demo can move off local LM Studio.
+
+### Decisions made
+- Keep the existing backend behavior intact where possible.
+- Prefer a provider-agnostic OpenAI-compatible client path over further LM Studio-only debugging.
+- Preserve legacy export shapes, while allowing provenance-aware output when available.
+
+### Remaining tasks
+- Re-run a clean extraction with the queue purged.
+- Switch demo env to a remote/OpenAI-compatible provider for the final run.
+- Verify export paths still work with provenance enabled.
+- Remove/ignore local artifacts before commit if they are not part of the product.
+
+---
+
 ## Environment context
 - Host OS: Windows
 - Dev environment: WSL + VS Code terminal
@@ -291,6 +313,23 @@ Attempted to improve JSON stability for multi-record calls against LM Studio.
 
 #### Result
 This was only a partial mitigation. The model still returned malformed/truncated output in practice.
+
+---
+
+### 11. 2026-05-20 follow-up repairs
+#### Problem
+The nested VLM settings were not reliably loading `.env`, provenance was missing, and the retry path hid the real exception behind generic log strings.
+
+#### Change made
+- Introduced a shared `AppBaseSettings` with an absolute repo-root `.env` path
+- Added `src/pipeline/provenance.py`
+- Added `FieldMetadata.to_provenance()` bridging
+- Added breadcrumb/traceback logging in constrained VLM + retry paths
+- Hardened page-number comparisons to use `int(...)`
+- Added optional `LM_STUDIO_API_KEY` / `OPENAI_API_KEY` / `OPENROUTER_API_KEY` support in the OpenAI-compatible client
+
+#### Why
+This made the settings load deterministic, restored the provenance export path, and made the VLM failures debuggable while allowing the demo to move away from local LM Studio.
 
 ---
 

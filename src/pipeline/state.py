@@ -216,6 +216,26 @@ class FieldMetadata:
             result["bbox"] = self.bbox.to_dict()
         return result
 
+    def to_provenance(
+        self,
+        *,
+        extraction_path: list[str] | None = None,
+        agent_signatures: list[str] | None = None,
+        vlm_model_id: str = "",
+    ):
+        """Bridge legacy field metadata into a Provenance object."""
+        from src.pipeline.provenance import Provenance
+
+        return Provenance(
+            page=self.source_page,
+            bbox=self.bbox,
+            source_block_id=self.field_name,
+            extraction_path=extraction_path or [],
+            agent_signatures=agent_signatures or [],
+            confidence=self.confidence,
+            vlm_model_id=vlm_model_id,
+        )
+
 
 @dataclass(slots=True)
 class PageExtraction:

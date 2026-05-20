@@ -9,6 +9,7 @@ Provides common functionality including:
 
 import random
 import time
+import traceback
 from collections.abc import Callable
 from typing import Any, TypeVar
 
@@ -223,6 +224,8 @@ def retry_with_backoff(
                     max_retries=config.max_retries,
                     delay_ms=delay_ms,
                     error=str(e),
+                    error_type=type(e).__name__,
+                    traceback=traceback.format_exc(),
                 )
 
                 if on_retry:
@@ -234,6 +237,8 @@ def retry_with_backoff(
                     "retry_exhausted",
                     attempts=config.max_retries + 1,
                     error=str(e),
+                    error_type=type(e).__name__,
+                    traceback=traceback.format_exc(),
                 )
 
     if last_exception:

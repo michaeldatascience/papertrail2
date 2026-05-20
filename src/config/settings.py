@@ -20,6 +20,17 @@ from pydantic import (
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class AppBaseSettings(BaseSettings):
+    """Project-wide settings base with .env loading enabled."""
+
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).resolve().parents[2] / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+
 class Environment(str, Enum):
     """Application environment enumeration."""
 
@@ -95,7 +106,7 @@ class VLMMode(str, Enum):
     HARD = "hard"
 
 
-class LMStudioBackendSettings(BaseSettings):
+class LMStudioBackendSettings(AppBaseSettings):
     """Backend-specific settings for LM Studio in the V3 dual-VLM topology.
 
     Distinct from the legacy :class:`LMStudioSettings` so the existing
@@ -149,7 +160,7 @@ class LMStudioBackendSettings(BaseSettings):
         return v
 
 
-class VLLMBackendSettings(BaseSettings):
+class VLLMBackendSettings(AppBaseSettings):
     """vLLM backend configuration (Phase 0)."""
 
     model_config = SettingsConfigDict(
@@ -187,7 +198,7 @@ class VLLMBackendSettings(BaseSettings):
         return v
 
 
-class GemmaBackendSettings(BaseSettings):
+class GemmaBackendSettings(AppBaseSettings):
     """Gemma 4 backend configuration (Phase K — Kaggle MVP).
 
     Targets ``lmstudio-community/gemma-4-26B-A4B-it-GGUF`` served by LM
@@ -264,7 +275,7 @@ class GemmaBackendSettings(BaseSettings):
     )
 
 
-class VLMSettings(BaseSettings):
+class VLMSettings(AppBaseSettings):
     """Top-level VLM stack settings (Phase 0 + Phase K).
 
     Selects the backend and mode, and holds the per-backend nested
@@ -325,7 +336,7 @@ class VLMSettings(BaseSettings):
         return v
 
 
-class LMStudioSettings(BaseSettings):
+class LMStudioSettings(AppBaseSettings):
     """LM Studio VLM configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -340,6 +351,14 @@ class LMStudioSettings(BaseSettings):
     model: str = Field(
         default="qwen3-vl",
         description="Model identifier for VLM requests",
+    )
+    api_key: SecretStr | None = Field(
+        default=None,
+        description=(
+            "Optional API key for OpenAI-compatible endpoints. "
+            "Set LM_STUDIO_API_KEY (or override base_url to a remote "
+            "provider) to run without a local LM Studio process."
+        ),
     )
     max_tokens: Annotated[int, Field(ge=1, le=32768)] = Field(
         default=4096,
@@ -372,7 +391,7 @@ class LMStudioSettings(BaseSettings):
         return f"{self.base_url}/chat/completions"
 
 
-class PDFProcessingSettings(BaseSettings):
+class PDFProcessingSettings(AppBaseSettings):
     """PDF processing configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -419,7 +438,7 @@ class PDFProcessingSettings(BaseSettings):
         return self.max_file_size_mb * 1024 * 1024
 
 
-class ImageEnhancementSettings(BaseSettings):
+class ImageEnhancementSettings(AppBaseSettings):
     """Image enhancement configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -457,7 +476,7 @@ class ImageEnhancementSettings(BaseSettings):
     )
 
 
-class Mem0Settings(BaseSettings):
+class Mem0Settings(AppBaseSettings):
     """Mem0 memory layer configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -512,7 +531,7 @@ class ExtractionEngine(str, Enum):
     DUAL_VLM = "dual_vlm"
 
 
-class ExtractionSettings(BaseSettings):
+class ExtractionSettings(AppBaseSettings):
     """Extraction pipeline configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -628,7 +647,7 @@ class ExtractionSettings(BaseSettings):
         return v
 
 
-class ValidationSettings(BaseSettings):
+class ValidationSettings(AppBaseSettings):
     """Validation configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -654,7 +673,7 @@ class ValidationSettings(BaseSettings):
     )
 
 
-class AgentSettings(BaseSettings):
+class AgentSettings(AppBaseSettings):
     """Agent optimization and caching settings."""
 
     model_config = SettingsConfigDict(
@@ -684,7 +703,7 @@ class AgentSettings(BaseSettings):
     )
 
 
-class APISettings(BaseSettings):
+class APISettings(AppBaseSettings):
     """FastAPI server configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -752,7 +771,7 @@ class APISettings(BaseSettings):
     )
 
 
-class CelerySettings(BaseSettings):
+class CelerySettings(AppBaseSettings):
     """Celery task queue configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -790,7 +809,7 @@ class CelerySettings(BaseSettings):
     )
 
 
-class SecuritySettings(BaseSettings):
+class SecuritySettings(AppBaseSettings):
     """Security configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -820,7 +839,7 @@ class SecuritySettings(BaseSettings):
     )
 
 
-class HIPAASettings(BaseSettings):
+class HIPAASettings(AppBaseSettings):
     """HIPAA compliance configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -862,7 +881,7 @@ class HIPAASettings(BaseSettings):
         return path
 
 
-class ExportSettings(BaseSettings):
+class ExportSettings(AppBaseSettings):
     """Export configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -900,7 +919,7 @@ class ExportSettings(BaseSettings):
         return path
 
 
-class StreamlitSettings(BaseSettings):
+class StreamlitSettings(AppBaseSettings):
     """Streamlit UI configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -926,7 +945,7 @@ class StreamlitSettings(BaseSettings):
     )
 
 
-class MonitoringSettings(BaseSettings):
+class MonitoringSettings(AppBaseSettings):
     """Monitoring configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -948,7 +967,7 @@ class MonitoringSettings(BaseSettings):
     )
 
 
-class DatabaseSettings(BaseSettings):
+class DatabaseSettings(AppBaseSettings):
     """Database configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -966,7 +985,7 @@ class DatabaseSettings(BaseSettings):
     )
 
 
-class ProvenanceSettings(BaseSettings):
+class ProvenanceSettings(AppBaseSettings):
     """V3 Phase 4 — provenance threading configuration.
 
     The migration from bare-scalar ``merged_extraction`` to
@@ -1010,7 +1029,7 @@ class ProvenanceSettings(BaseSettings):
     )
 
 
-class ProfileSettings(BaseSettings):
+class ProfileSettings(AppBaseSettings):
     """V3 Phase 5 — document profile configuration.
 
     A *profile* is the orthogonal axis to *modality*: profiles describe
@@ -1057,7 +1076,7 @@ class ProfileSettings(BaseSettings):
     )
 
 
-class CalibrationSettings(BaseSettings):
+class CalibrationSettings(AppBaseSettings):
     """Confidence calibration configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -1092,7 +1111,7 @@ class CalibrationSettings(BaseSettings):
         return path
 
 
-class ObservabilitySettings(BaseSettings):
+class ObservabilitySettings(AppBaseSettings):
     """WS-7: AI observability sinks (Phoenix + PostHog).
 
     Both sinks are off by default. When enabled, the
@@ -1134,7 +1153,7 @@ class ObservabilitySettings(BaseSettings):
     )
 
 
-class PHISettings(BaseSettings):
+class PHISettings(AppBaseSettings):
     """WS-6: opt-in PHI redaction configuration.
 
     PHI mode is **off by default**. When enabled, every string field in
@@ -1183,7 +1202,7 @@ class PHISettings(BaseSettings):
     )
 
 
-class ModelRoutingSettings(BaseSettings):
+class ModelRoutingSettings(AppBaseSettings):
     """Multi-model routing configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -1209,7 +1228,7 @@ class ModelRoutingSettings(BaseSettings):
     )
 
 
-class WebhookSettings(BaseSettings):
+class WebhookSettings(AppBaseSettings):
     """Webhook subscription and delivery settings."""
 
     model_config = SettingsConfigDict(
@@ -1231,7 +1250,7 @@ class WebhookSettings(BaseSettings):
     )
 
 
-class LoggingSettings(BaseSettings):
+class LoggingSettings(AppBaseSettings):
     """Logging configuration settings."""
 
     model_config = SettingsConfigDict(
@@ -1277,7 +1296,7 @@ class LoggingSettings(BaseSettings):
         return path
 
 
-class Settings(BaseSettings):
+class Settings(AppBaseSettings):
     """
     Main application settings aggregating all configuration sections.
 
@@ -1286,7 +1305,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).resolve().parents[2] / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,

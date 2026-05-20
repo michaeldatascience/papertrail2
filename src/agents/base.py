@@ -474,7 +474,18 @@ class BaseAgent(ABC):
         # Same shape LMStudioBackend would build; centralised here so
         # tests that mock ``self._client.send_vision_request`` directly
         # observe the schema kwarg without needing the backend factory.
-        schema_dict = schema.model_json_schema()
+        try:
+            schema_dict = schema.model_json_schema()
+        except Exception as e:
+            self._logger.exception(
+                "constrained_schema_generation_failed",
+                agent=self._name,
+                schema=schema.__name__,
+                role=role.value,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise
         response_format = {
             "type": "json_schema",
             "json_schema": {"name": "veridoc", "schema": schema_dict},
@@ -492,6 +503,15 @@ class BaseAgent(ABC):
                     agent=self._name,
                     error=str(exc),
                 )
+
+        self._logger.debug(
+            "constrained_request_breadcrumb",
+            agent=self._name,
+            schema=schema.__name__,
+            role=role.value,
+            model_override=model_override,
+            response_format_type=response_format["type"],
+        )
 
         try:
             from src.monitoring.observability import get_dispatcher
@@ -587,12 +607,27 @@ class BaseAgent(ABC):
                 "constrained_vision_request_failed",
                 agent=self._name,
                 error=str(e),
+                error_type=type(e).__name__,
+                schema=schema.__name__,
+                role=role.value,
+                model_override=model_override,
             )
             raise AgentError(
                 f"VLM request failed: {e}",
                 agent_name=self._name,
                 recoverable=True,
             ) from e
+        except Exception as e:
+            self._logger.exception(
+                "constrained_vision_request_unhandled",
+                agent=self._name,
+                error=str(e),
+                error_type=type(e).__name__,
+                schema=schema.__name__,
+                role=role.value,
+                model_override=model_override,
+            )
+            raise
 
     def send_vision_request_with_json(
         self,
