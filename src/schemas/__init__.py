@@ -6,6 +6,7 @@ field type definitions, and validation rules.
 """
 
 # Import finance schemas to auto-register them
+from src.schemas.aadhaar_card import AADHAAR_CARD_SCHEMA
 from src.schemas.bank_statement import BANK_STATEMENT_SCHEMA
 from src.schemas.base import (
     DocumentSchema,
@@ -136,6 +137,8 @@ __all__ = [
     "W2_SCHEMA",
     "FORM_1099_SCHEMA",
     "BANK_STATEMENT_SCHEMA",
+    # Identity schemas
+    "AADHAAR_CARD_SCHEMA",
     # Generic fallback for unknown documents
     "ENHANCED_GENERIC_SCHEMA",
     # Nested schemas

@@ -374,6 +374,7 @@ def process_document_task(
     mask_phi: bool = False,
     priority: str = "normal",
     callback_url: str | None = None,
+    extraction_mode: str = "multi",
 ) -> dict[str, Any]:
     """
     Process a single document asynchronously.
@@ -387,6 +388,8 @@ def process_document_task(
         mask_phi: Whether to mask PHI fields.
         priority: Processing priority (low/normal/high).
         callback_url: URL to call on completion/failure (webhook).
+        extraction_mode: 'single' for the legacy pipeline, 'multi'/'auto'
+            for per-entity multi-record extraction.
 
     Returns:
         TaskResult as dictionary.
@@ -403,6 +406,7 @@ def process_document_task(
         task_id=task_id,
         pdf_path=pdf_path,
         schema_name=schema_name,
+        extraction_mode=extraction_mode,
     )
 
     result = TaskResult(
@@ -429,66 +433,125 @@ def process_document_task(
         # Import pipeline here to avoid circular imports
         from src.pipeline.runner import PipelineRunner
 
-        # Run the extraction pipeline
         runner = PipelineRunner(enable_checkpointing=False)
-        pipeline_result = runner.extract_from_pdf(
-            pdf_path=pdf_path,
-            custom_schema=None,
-        )
+        use_multi_record = extraction_mode in {"multi", "auto"}
 
-        result.processing_id = pipeline_result.get("processing_id", "")
+        if use_multi_record:
+            from src.config import get_extraction_config
+
+            cfg = get_extraction_config()
+            multi_result = runner.extract_multi_record(
+                pdf_path=pdf_path,
+                enable_validation=cfg["enable_validation_stage"],
+                enable_self_correction=cfg["enable_self_correction"],
+                confidence_threshold=cfg["validation_confidence_threshold"],
+                enable_consensus=cfg["enable_consensus_for_critical_fields"],
+                critical_field_keywords=cfg["critical_field_keywords"],
+                max_fields_per_call=cfg["max_fields_per_extraction_call"],
+                enable_schema_decomposition=cfg["enable_schema_decomposition"],
+                enable_synthetic_examples=cfg["enable_synthetic_few_shot_examples"],
+            )
+            result.processing_id = task_id
+            pipeline_result: dict[str, Any] = {
+                "processing_id": result.processing_id,
+                **multi_result.to_dict(),
+            }
+        else:
+            pipeline_result = runner.extract_from_pdf(
+                pdf_path=pdf_path,
+                custom_schema=None,
+            )
+            result.processing_id = pipeline_result.get("processing_id", "")
+
         result.status = TaskStatus.VALIDATING
-
         _update_task_state("VALIDATING", {"status": TaskStatus.VALIDATING.value})
 
-        # Handle export
         result.status = TaskStatus.EXPORTING
         _update_task_state("EXPORTING", {"status": TaskStatus.EXPORTING.value})
 
-        output_path = ""
+        output_paths: list[str] = []
         if output_dir:
             output_base = Path(output_dir) / result.processing_id
 
-            if export_format in ("json", "both"):
-                from src.export import ExportFormat, export_to_json
+            if use_multi_record:
+                from src.export.consolidated_export import export_excel as export_multi_excel
+                from src.export.consolidated_export import export_json as export_multi_json
+                from src.export.consolidated_export import export_markdown as export_multi_markdown
 
-                json_path = output_base.with_suffix(".json")
-                export_to_json(
-                    pipeline_result,
-                    output_path=json_path,
-                    format=ExportFormat.DETAILED,
-                    include_metadata=True,
-                    include_confidence=True,
-                )
-                output_path = str(json_path)
+                if export_format in ("json", "both", "all"):
+                    json_path = output_base.with_suffix(".json")
+                    export_multi_json(multi_result, json_path, mask_phi=mask_phi)
+                    output_paths.append(str(json_path))
 
-            if export_format in ("excel", "both"):
-                from src.export import export_to_excel
+                if export_format in ("excel", "both", "all"):
+                    excel_path = output_base.with_suffix(".xlsx")
+                    export_multi_excel(multi_result, excel_path, mask_phi=mask_phi)
+                    output_paths.append(str(excel_path))
 
-                excel_path = output_base.with_suffix(".xlsx")
-                export_to_excel(
-                    pipeline_result,
-                    output_path=excel_path,
-                    mask_phi=mask_phi,
-                )
-                if export_format == "excel":
-                    output_path = str(excel_path)
-                else:
-                    output_path = f"{json_path}; {excel_path}"
+                if export_format in ("markdown", "all"):
+                    md_path = output_base.with_suffix(".md")
+                    export_multi_markdown(multi_result, md_path, mask_phi=mask_phi)
+                    output_paths.append(str(md_path))
+            else:
+                if export_format in ("json", "both", "all"):
+                    from src.export import ExportFormat, export_to_json
 
-        # Build final result
+                    json_path = output_base.with_suffix(".json")
+                    export_to_json(
+                        pipeline_result,
+                        output_path=json_path,
+                        format=ExportFormat.DETAILED,
+                        include_metadata=True,
+                        include_confidence=True,
+                    )
+                    output_paths.append(str(json_path))
+
+                if export_format in ("excel", "both", "all"):
+                    from src.export import export_to_excel
+
+                    excel_path = output_base.with_suffix(".xlsx")
+                    export_to_excel(
+                        pipeline_result,
+                        output_path=excel_path,
+                        mask_phi=mask_phi,
+                    )
+                    output_paths.append(str(excel_path))
+
+                if export_format in ("markdown", "all"):
+                    from src.export import MarkdownStyle, export_to_markdown
+
+                    md_path = output_base.with_suffix(".md")
+                    export_to_markdown(
+                        pipeline_result,
+                        output_path=md_path,
+                        style=MarkdownStyle.DETAILED,
+                        mask_phi=mask_phi,
+                    )
+                    output_paths.append(str(md_path))
+
         completed_at = datetime.now(UTC)
         duration_ms = int((completed_at - started_at).total_seconds() * 1000)
 
         result.status = TaskStatus.COMPLETED
-        result.output_path = output_path
+        result.output_path = "; ".join(output_paths)
         result.completed_at = completed_at.isoformat()
         result.duration_ms = duration_ms
-        result.field_count = len(pipeline_result.get("merged_extraction", {}))
-        result.overall_confidence = pipeline_result.get("overall_confidence", 0.0)
-        result.requires_human_review = pipeline_result.get("requires_human_review", False)
-        result.human_review_reason = pipeline_result.get("human_review_reason", "")
-        result.warnings = pipeline_result.get("warnings", [])
+        if use_multi_record:
+            records = pipeline_result.get("records", [])
+            result.field_count = pipeline_result.get("total_records", 0)
+            confidences = [float(r.get("confidence", 0.0)) for r in records]
+            result.overall_confidence = (
+                sum(confidences) / len(confidences) if confidences else 0.0
+            )
+            result.requires_human_review = False
+            result.human_review_reason = ""
+            result.warnings = []
+        else:
+            result.field_count = len(pipeline_result.get("merged_extraction", {}))
+            result.overall_confidence = pipeline_result.get("overall_confidence", 0.0)
+            result.requires_human_review = pipeline_result.get("requires_human_review", False)
+            result.human_review_reason = pipeline_result.get("human_review_reason", "")
+            result.warnings = pipeline_result.get("warnings", [])
 
         # Store result for later retrieval (preview, export)
         _store_pipeline_result(result.processing_id, pipeline_result)

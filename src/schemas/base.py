@@ -41,6 +41,9 @@ class DocumentType(str, Enum):
     FORM_1099 = "form_1099"
     BANK_STATEMENT = "bank_statement"
 
+    # Identity documents
+    AADHAAR_CARD = "aadhaar_card"
+
     # Generic
     CUSTOM = "custom"
     UNKNOWN = "unknown"

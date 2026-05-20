@@ -56,6 +56,7 @@ Observed supported formats:
 
 ### Schemas observed in code
 From `src/schemas/`:
+- aadhaar card
 - bank statement
 - CMS-1500
 - EOB
@@ -382,7 +383,10 @@ Result:
 - some pages work well for live/static endpoints like `/schemas`
 - others are only partially useful unless more persistence/state plumbing is completed
 
-### 4. Queue/task UX is optional-path sensitive
+### 4. Schema-selected uploads are not equally wired across all paths
+The repo now includes an `aadhaar_card` schema, but the async upload flow still defaults toward the multi-record pipeline. That works well for invoices/lists but is not yet a strong fit for single identity-card style documents like Aadhaar without further routing/schema-enforcement work.
+
+### 5. Queue/task UX is optional-path sensitive
 The code degrades when Redis/Celery are unavailable, but some task/queue UI flows are much more meaningful if those services are actually running.
 
 ---
